@@ -1,7 +1,3 @@
--- Settings
-Keybind = "Insert"
-DarkMode = true
-
 -- ESP Function
 local ESP = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
 ESP:Toggle(true)
