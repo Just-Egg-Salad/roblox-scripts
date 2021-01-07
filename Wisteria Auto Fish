@@ -1,0 +1,42 @@
+-- Fix their fucking workspace
+Instance.new("Folder",workspace).Name = "NPC(s)"
+local shit = workspace:GetChildren()
+for i = 1, #shit do local v = shit[i]
+    if v.Name ~= "Terrain" and v.Name ~= "Camera" and v.ClassName ~= "Folder" then
+        local folder = v:FindFirstChild("Humanoid") and workspace:FindFirstChild("NPC(s)") or workspace:FindFirstChild(v.ClassName.."(s)") or Instance.new("Folder", workspace)
+        folder.Name = v.ClassName.."(s)"
+        v.Parent = folder
+    end
+end
+
+-- Player
+local player = game.Players.LocalPlayer
+
+-- Auto Sell
+game.ReplicatedStorage.Events.Purchase.OnClientInvoke = function()
+    return "True"
+end
+
+-- Delete Fish
+local fish = {"Sardine","Bream","Haddock","Tuna","Rainbow Trout","Salmon"}
+function del()
+    for i,v in pairs(player.Backpack:GetChildren()) do
+        if table.find(fish,v.Name) then
+            v.Parent = player.Character
+            wait()
+            v:Destroy()
+        end
+    end
+end
+
+-- Yes
+player.Backpack.Fishing:FireServer({Target=workspace["Part(s)"].Water,Mouse=workspace["Part(s)"].Water.Position})
+while true do
+    for i = 1, Amount do
+        player.Backpack.Fishing:FireServer({won=true,Done=true})
+    end
+    fireclickdetector(workspace.SellShop["Barrel of Fish"].ClickPart.ClickDetector, 1)
+    wait(Delay/2)
+    del()
+    wait(Delay/2)
+end
