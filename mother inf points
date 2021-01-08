@@ -1,0 +1,19 @@
+-- grab code
+local code = (function()
+    for i,v in pairs(getgc()) do
+        if type(v) == "function" and islclosure(v) and getfenv(v).script and getfenv(v).script == game.Players.LocalPlayer.Character.Final then
+            if #getupvalues(v) == 1 and type(getupvalues(v)[1]) == "number" then
+                return getupvalues(v)[1]
+            end
+        end
+    end
+end)()
+
+-- skeet
+if typeof(code) == "number" then
+    for i = 1, amount do
+        game.ReplicatedStorage.Point:FireServer(code,workspace.Tiempodejuego.Value / 200 * game.Players.LocalPlayer.PlayerStats.x.Value,1)
+    end
+else
+    game.Players.LocalPlayer:Kick("Patched!")
+end
