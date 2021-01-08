@@ -1,0 +1,44 @@
+-- UI Library
+local library = loadstring(game:HttpGetAsync("https://pastebin.com/raw/HYcfs6KC"))()
+local w = library:CreateWindow('auto arcade')
+w:Section('made by egg salad')
+w:Toggle('Enabled', {flag = "mayo"})
+w:Dropdown("Collect Settings", {
+    location = _G;
+    flag = "memes";
+    list = {"When Full","Always"}
+})
+
+-- Variable
+local player = game.Players.LocalPlayer
+local stuff = {"Full","Broken","Dirty"}
+
+-- Get Store
+local store = (function()
+    for i,v in pairs(workspace.StoreModels:GetChildren()) do
+        if v.Owner.Value == player.Name then
+            return v
+        end
+    end
+end)()
+
+-- Skeet
+while true do
+    if w.flags.mayo then
+        local egg = store.Furniture:GetChildren()
+        for i = 1, #egg do local salad = egg[i]
+            for i,v in pairs(salad:GetChildren()) do
+                if w.flags.mayo and (table.find(stuff,v.Name) or _G.memes == "Always" and v.Name == "CoinStorage" and v.Value > 0) then
+                    repeat
+                        pcall(function()
+                            player.Character.HumanoidRootPart.CFrame = salad:FindFirstChildOfClass("Model").PrimaryPart.CFrame
+                        end)
+                        wait()
+                        game.ReplicatedStorage.Events.FurnitureInteract:FireServer(salad, v.Name == "CoinStorage" and "Collect" or v.Name)
+                    until not v.Parent or not w.flags.mayo or v.Name == "CoinStorage" and v.Value == 0
+                end
+            end
+        end
+    end
+    wait(.2)
+end
