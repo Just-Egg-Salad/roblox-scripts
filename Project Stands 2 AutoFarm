@@ -1,0 +1,109 @@
+-- mmmm myes
+Distance = 7
+
+-- Variable
+local player = game.Players.LocalPlayer
+local npcs = workspace.Map["Interactable NPCS"]
+local funcs = game.ReplicatedStorage.Rex.RemoteFunctions
+local data = require(game.ReplicatedStorage.PlayerData)["__index"][tostring(player.UserId)]
+local vim = game:GetService("VirtualInputManager")
+local femboy = {"E","R","F","T"}
+
+-- Camera
+player.DevCameraOcclusionMode = "Invisicam"
+
+-- Enemy Quests
+Quests = {
+    Monkey = {
+        NPC = npcs.Dark_listor,
+        Name = "Monkey Slaying"
+    },
+    Thug = {
+        NPC = npcs.Convocation,
+        Name = "Thug Patrol"
+    },
+    Cop = {
+        NPC = npcs.dartsoma,
+        Name = "Anti Cop"
+    },
+    Boxer = {
+        NPC = npcs.Vecr0z,
+        Name = "Boxing Lesson"
+    }
+}
+
+-- UI Library
+local library = loadstring(game:HttpGetAsync("https://pastebin.com/raw/HYcfs6KC"))()
+local w = library:CreateWindow('piss project')
+w:Section('Made by egg salad')
+w:Toggle('Enabled', {flag = "egg"})
+w:Slider("Distance",{min=-9,max=9},function(v)Distance=v;end)
+w:Dropdown("Target",{flag="mayo",list={'Monkey','Thug','Cop','Boxer'}})
+w:Section('Abilities')
+for i = 1, #femboy do
+    w:Toggle(femboy[i],{flag=femboy[i]})
+end
+
+-- Quest Check
+function quest()
+    local limit = data.Stats["Quest Limit"]
+    for i,v in pairs(data.Quests) do
+        if v.Id ~= Quests[w.flags.mayo].Name then
+            funcs["Quests.Abandon"]:InvokeServer(i)
+        end
+    end
+    if #data.Quests < limit then
+        pcall(function()
+            player.Character.HumanoidRootPart.CFrame = Quests[w.flags.mayo].NPC.HumanoidRootPart.CFrame
+            wait(.35)
+        end)
+        for i = #data.Quests, limit do
+            funcs["Quests.Accept"]:InvokeServer(Quests[w.flags.mayo].Name)
+        end
+    end
+end
+
+-- NoClip
+game:GetService("RunService").RenderStepped:Connect(function()
+    if w.flags.egg then
+        player.Character.Humanoid:ChangeState(11)
+    end
+end)
+
+-- Skeet
+while true do
+    local shit = workspace.Entities:GetChildren()
+    for i = 1, #shit do local v = shit[i]
+        if w.flags.egg and v.Name == w.flags.mayo and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("HumanoidRootPart") then
+            quest()
+            repeat
+                -- Stand Check
+                if player.Character and not player.Character:FindFirstChild("Stand") then
+                    funcs["ControlsHandler.Summon"]:InvokeServer(CFrame.new())
+                end
+                -- Teleport
+                pcall(function()
+                    player.Character.HumanoidRootPart.CFrame = CFrame.new(v.HumanoidRootPart.Position) * CFrame.Angles(math.rad(Distance < 0 and 90 or -90), 0, 0) + Vector3.new(0, Distance, 0)
+                    player.Character.HumanoidRootPart.OverheadUI:Destroy()
+                end)
+                wait()
+                -- Combat
+                spawn(function()
+                    for i = 1, 4 do
+                        if w.flags[femboy[i]] then
+                            vim:SendKeyEvent(true,Enum.KeyCode[femboy[i]],false,game)
+                            vim:SendKeyEvent(false,Enum.KeyCode[femboy[i]],false,game)
+                        end
+                    end
+                    pcall(funcs["ControlsHandler.Combat"].InvokeServer,funcs["ControlsHandler.Combat"],v.HumanoidRootPart.CFrame)
+                end)
+            until v.Name ~= w.flags.mayo or not w.flags.egg or not v.Parent or v.Parent.Name ~= "Entities" or not v:FindFirstChild("Humanoid") or v.Humanoid.Health <= 0
+        end
+    end
+    wait(.2)
+    if w.flags.egg then
+        pcall(function()
+            player.Character.HumanoidRootPart.CFrame = Quests[w.flags.mayo].NPC.HumanoidRootPart.CFrame
+        end)
+    end
+end
