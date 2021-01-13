@@ -33,39 +33,40 @@ Quests = {
 }
 
 -- UI Library
-local library = loadstring(game:HttpGetAsync("https://pastebin.com/raw/HYcfs6KC"))()
-local w = library:CreateWindow('piss project')
-w:Section('Made by egg salad')
-w:Toggle('Enabled', {flag = "egg"})
-w:Slider("Distance",{min=-9,max=9},function(v)Distance=v;end)
-w:Dropdown("Target",{flag="mayo",list={'Monkey','Thug','Cop','Boxer'}})
-w:Section('Abilities')
+local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
+local window = library:CreateWindow("piss project")
+window:AddLabel({text="Made by egg salad"})
+window:AddToggle({text='Enabled',flag='egg'})
+window:AddSlider({text='Distance',flag='cumsalad',min=-9,max=9,callback=function(sex)Distance=sex;end})
+window:AddList({text='Enemy',flag='mayo',values={"Monkey","Thug","Cop","Boxer"}})
+local abba = window:AddFolder("Abilities")
 for i = 1, #femboy do
-    w:Toggle(femboy[i],{flag=femboy[i]})
+    abba:AddToggle({text=femboy[i],flag=femboy[i]})
 end
+library:Init()
 
 -- Quest Check
 function quest()
     local limit = data.Stats["Quest Limit"]
     for i,v in pairs(data.Quests) do
-        if v.Id ~= Quests[w.flags.mayo].Name then
+        if v.Id ~= Quests[library.flags.mayo].Name then
             funcs["Quests.Abandon"]:InvokeServer(i)
         end
     end
     if #data.Quests < limit then
         pcall(function()
-            player.Character.HumanoidRootPart.CFrame = Quests[w.flags.mayo].NPC.HumanoidRootPart.CFrame
+            player.Character.HumanoidRootPart.CFrame = Quests[library.flags.mayo].NPC.HumanoidRootPart.CFrame
             wait(.35)
         end)
         for i = #data.Quests, limit do
-            funcs["Quests.Accept"]:InvokeServer(Quests[w.flags.mayo].Name)
+            funcs["Quests.Accept"]:InvokeServer(Quests[library.flags.mayo].Name)
         end
     end
 end
 
 -- NoClip
 game:GetService("RunService").RenderStepped:Connect(function()
-    if w.flags.egg then
+    if library.flags.egg then
         player.Character.Humanoid:ChangeState(11)
     end
 end)
@@ -74,7 +75,7 @@ end)
 while true do
     local shit = workspace.Entities:GetChildren()
     for i = 1, #shit do local v = shit[i]
-        if w.flags.egg and v.Name == w.flags.mayo and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("HumanoidRootPart") then
+        if library.flags.egg and v.Name == library.flags.mayo and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("HumanoidRootPart") then
             quest()
             repeat
                 -- Stand Check
@@ -90,20 +91,20 @@ while true do
                 -- Combat
                 spawn(function()
                     for i = 1, 4 do
-                        if w.flags[femboy[i]] then
+                        if library.flags[femboy[i]] then
                             vim:SendKeyEvent(true,Enum.KeyCode[femboy[i]],false,game)
                             vim:SendKeyEvent(false,Enum.KeyCode[femboy[i]],false,game)
                         end
                     end
                     pcall(funcs["ControlsHandler.Combat"].InvokeServer,funcs["ControlsHandler.Combat"],v.HumanoidRootPart.CFrame)
                 end)
-            until v.Name ~= w.flags.mayo or not w.flags.egg or not v.Parent or v.Parent.Name ~= "Entities" or not v:FindFirstChild("Humanoid") or v.Humanoid.Health <= 0
+            until v.Name ~= library.flags.mayo or not library.flags.egg or not v.Parent or v.Parent.Name ~= "Entities" or not v:FindFirstChild("Humanoid") or v.Humanoid.Health <= 0
         end
     end
     wait(.2)
-    if w.flags.egg then
+    if library.flags.egg then
         pcall(function()
-            player.Character.HumanoidRootPart.CFrame = Quests[w.flags.mayo].NPC.HumanoidRootPart.CFrame
+            player.Character.HumanoidRootPart.CFrame = Quests[library.flags.mayo].NPC.HumanoidRootPart.CFrame
         end)
     end
 end
