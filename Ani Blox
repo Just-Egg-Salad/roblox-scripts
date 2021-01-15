@@ -13,12 +13,6 @@ if game.PlaceId == 5882953768 then
         yes,solo,inv,pInv = pcall(function() return game.ReplicatedStorage.SoloEvent,game.ReplicatedStorage.InventoryEvents,game.Players.LocalPlayer.Inventory end) 
         wait(1)
     until yes
-    -- AutoSell
-    for i,v in pairs(pInv:GetChildren()) do
-        if Auto.Enabled and v:FindFirstChild("Slot") and v:FindFirstChild("Star") and v.Star.Value < Auto.MinStars and table.find(Auto.Units,v.Name) then
-            game.ReplicatedStorage.InventoryEvents:FireServer("UnitSell", v.Slot.Value)
-        end
-    end
     -- Start
     game.ReplicatedStorage.SoloEvent:FireServer(Mode,Stage,Level)
     return
