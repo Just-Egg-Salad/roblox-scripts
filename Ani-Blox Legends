@@ -19,7 +19,6 @@ Stage = "]].. hi[2] ..'"\n'..[[
 Level = ]].. hi[3] ..'\n'..[[
 Skills = {[1]=]]..Skills[1]..";[2]="..Skills[2]..";[3]="..Skills[3]..";[4]="..Skills[4]..[[}  
 ]].."\n"..sex
-setclipboard(str)
 syn.queue_on_teleport(str)
 game.ReplicatedStorage.SoloEvent:FireServer(hi[1],hi[2],hi[3])
 
