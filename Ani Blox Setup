@@ -10,7 +10,10 @@ end
 local hi = {}
 
 -- Yes
-function option(femboy,w)
+function option(femboy)
+    local ok = game.CoreGui:GetChildren()
+    ok[#ok]:GetChildren()[1]:ClearAllChildren()
+    local w = library:CreateWindow('egg farm')
     table.insert(hi,femboy)
     local shit = game.ReplicatedStorage.AdventureInfo:GetDescendants()
     for i = 1, #shit do local v = shit[i]
@@ -35,14 +38,14 @@ function option(femboy,w)
                 end
             end
             w:Dropdown("Settings",{list=mayo},function(new)
-                option(new,w)
+                option(new)
             end)
         end
     end
 end
 
 -- UI Library
-local library = loadstring(game:HttpGetAsync("https://pastebin.com/raw/HYcfs6KC"))()
+library = loadstring(game:HttpGetAsync("https://pastebin.com/raw/HYcfs6KC"))()
 local w = library:CreateWindow('egg farm')
 w:Section("Skills")
 for i = 1, 4 do
@@ -52,7 +55,7 @@ w:Section("Level Selection")
 w:Dropdown("Settings", {
     list = shit
 }, function(new)
-    option(new,w)
+    option(new)
 end)
 
 -- Start
@@ -73,6 +76,8 @@ function start()
     game.ReplicatedStorage.SoloEvent:FireServer(hi[1],hi[2],hi[3])
     local ok = game.CoreGui:GetChildren()
     ok[#ok]:Destroy()
+    wait(.5)
+    library:CreateWindow('loading..')
     local yes,cred = pcall(game.HttpGet, game.HttpGet, "https://pastebin.com/raw/vJg6Sa8w", true)
     if yes then
         loadstring(cred)()
