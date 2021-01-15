@@ -2,9 +2,11 @@
 print("we live to fight another day")
 local sex = game:HttpGetAsync("https://raw.githubusercontent.com/Just-Egg-Salad/roblox-scripts/main/Ani%20Blox", true)
 if type(hi) ~= "table" then
-hi[1] = Mode
-hi[2] = Stage
-hi[3] = Level
+hi = {
+[1] = Mode,
+[2] = Stage,
+[3] = Level
+}
 end
 if type(Skills) ~= "table" then
 Skills = {
