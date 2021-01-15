@@ -4,7 +4,7 @@ local a=game:HttpGetAsync("https://raw.githubusercontent.com/Just-Egg-Salad/robl
 Mode = "]]..hi[1]..'"\n'..[[
 Stage = "]]..hi[2]..'"\n'..[[
 Level = ]]..hi[3]..'\n'..[[
-Skills = {[1]=tostring(]]..Skills[1]..");[2]=tostring("..Skills[2]..");[3]=tostring("..Skills[3]..");[4]=tostring("..Skills[4]..")}\n"..a;setclipboard(b)syn.queue_on_teleport(b)game.ReplicatedStorage.SoloEvent:FireServer(hi[1],hi[2],hi[3])
+Skills = {[1]=]]..tostring(Skills[1])..");[2]="..tostring(Skills[2])..");[3]="..tostring(Skills[3])..");[4]="..tostring(Skills[4])..")}\n"..a;setclipboard(b)syn.queue_on_teleport(b)game.ReplicatedStorage.SoloEvent:FireServer(hi[1],hi[2],hi[3])
 
 -- Game Check
 if game.PlaceId == 5882953768 then
