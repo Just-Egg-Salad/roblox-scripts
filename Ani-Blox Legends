@@ -1,4 +1,5 @@
 -- Yes
+print("we live to fight another day")
 local sex = game:HttpGetAsync("https://raw.githubusercontent.com/Just-Egg-Salad/roblox-scripts/ac375fea775d949fa99d667551a8e4ffd7cf191c/Ani-Blox%20Legends", true)
 if type(hi) ~= "table" then
 hi[1] = Mode
@@ -20,7 +21,6 @@ Level = ]].. hi[3] ..'\n'..[[
 Skills = {[1]=]]..Skills[1]..";[2]="..Skills[2]..";[3]="..Skills[3]..";[4]="..Skills[4]..[[}  
 ]].."\n"..sex
 syn.queue_on_teleport(str)
-game.ReplicatedStorage.SoloEvent:FireServer(hi[1],hi[2],hi[3])
 
 -- Game Check
 if game.PlaceId == 5882953768 then
