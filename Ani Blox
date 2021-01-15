@@ -1,5 +1,6 @@
 -- Synapse Queue
-local a=game:HttpGetAsync("https://raw.githubusercontent.com/Just-Egg-Salad/roblox-scripts/main/Ani%20Blox",true)if type(hi)~="table"then hi[1]=Mode;hi[2]=Stage;hi[3]=Level end;if type(Skills)~="table"then Skills={[1]=tostring(w.flags["1"]),[2]=tostring(w.flags["2"]),[3]=tostring(w.flags["3"]),[4]=tostring(w.flags["4"])}end;local b=[[
+print("mettle of man")
+local a=game:HttpGetAsync("https://raw.githubusercontent.com/Just-Egg-Salad/roblox-scripts/main/Ani%20Blox",true)if type(hi)~="table"then hi={[1]=Mode,[2]=Stage,[3]=Level}end;if type(Skills)~="table"then Skills={[1]=tostring(w.flags["1"]),[2]=tostring(w.flags["2"]),[3]=tostring(w.flags["3"]),[4]=tostring(w.flags["4"])}end;local b=[[
 Mode = "]]..hi[1]..'"\n'..[[
 Stage = "]]..hi[2]..'"\n'..[[
 Level = ]]..hi[3]..'\n'..[[
