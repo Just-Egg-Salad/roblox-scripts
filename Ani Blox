@@ -1,0 +1,110 @@
+-- Yes
+print("we live to fight another day")
+local sex = game:HttpGetAsync("https://raw.githubusercontent.com/Just-Egg-Salad/roblox-scripts/ac375fea775d949fa99d667551a8e4ffd7cf191c/Ani-Blox%20Legends", true)
+if type(hi) ~= "table" then
+hi[1] = Mode
+hi[2] = Stage
+hi[3] = Level
+end
+if type(Skills) ~= "table" then
+Skills = {
+[1] = tostring(w.flags["1"]),
+[2] = tostring(w.flags["2"]),
+[3] = tostring(w.flags["3"]),
+[4] = tostring(w.flags["4"])
+}
+end
+local str = [[
+Mode = "]].. hi[1] ..'"\n'..[[
+Stage = "]].. hi[2] ..'"\n'..[[
+Level = ]].. hi[3] ..'\n'..[[
+Skills = {[1]=]]..Skills[1]..";[2]="..Skills[2]..";[3]="..Skills[3]..";[4]="..Skills[4]..[[}  
+]].."\n"..sex
+syn.queue_on_teleport(str)
+
+-- Game Check
+if game.PlaceId == 5882953768 then
+    -- Wait
+    repeat
+        yes,solo,inv,pInv = pcall(function() return game.ReplicatedStorage.SoloEvent,game.ReplicatedStorage.InventoryEvents,game.Players.LocalPlayer.Inventory end) 
+        wait(1)
+    until yes
+    -- AutoSell
+    for i,v in pairs(pInv:GetChildren()) do
+        if Auto.Enabled and v:FindFirstChild("Slot") and v:FindFirstChild("Star") and v.Star.Value < Auto.MinStars and table.find(Auto.Units,v.Name) then
+            game.ReplicatedStorage.InventoryEvents:FireServer("UnitSell", v.Slot.Value)
+        end
+    end
+    -- Start
+    game.ReplicatedStorage.SoloEvent:FireServer(Mode,Stage,Level)
+    return
+end
+
+-- Wait for shit to load
+local eggsex
+repeat
+    wait(1)
+    eggsex,player,blabla,UF = pcall(function() return game.Players.LocalPlayer.Inventory,game.Players.LocalPlayer.Backpack.UnitLScript.Combo,game.ReplicatedStorage.UnitInfo end)
+until eggsex
+
+-- Variable
+Distance = nil
+local players = game:GetService("Players")
+local player = players.LocalPlayer
+local unit
+
+-- Get Unit
+for i,v in pairs(player.Inventory:GetChildren()) do
+    if v:FindFirstChild("Slot") and v.Slot.Value == 1 and v:FindFirstChild("Star") then
+        unit = UF[v.Name][v.Star.Value.."Star"]
+    end
+end
+local damage = unit.Remotes.Damage
+local cds = player.UTeam.Unit1
+local sta = player.Backpack.UnitLScript
+
+-- Camera
+player.DevCameraOcclusionMode = "Invisicam"
+
+-- Attack
+damage.OnClientEvent:Connect(function(s,a)
+    local enemies = workspace:GetChildren()
+    for i = 1, #enemies do local v = enemies[i]
+        if v.Parent and v.Parent == workspace and v:IsA("Model") and not v:FindFirstChild("UnTargetable") and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and not players:GetPlayerFromCharacter(v) then
+            damage:FireServer(s,a,v)
+        end
+    end
+end)
+
+-- NoClip
+game:GetService("RunService").RenderStepped:Connect(function()
+    player.Character.Humanoid:ChangeState(11)
+end)
+
+-- Skeet
+while true do
+    local enemies = workspace:GetChildren()
+    for i = 1, #enemies do local v = enemies[i]
+        if v and v:IsA("Model") and not v:FindFirstChild("UnTargetable") and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and not players:GetPlayerFromCharacter(v) then
+            -- Set the proper distance
+            if typeof(Distance) ~= "number" then
+                Distance = player.Character.HumanoidRootPart.Position.Y - 8
+            end
+            -- Kill
+            repeat
+                pcall(function()
+                    player.Character.HumanoidRootPart.CFrame = CFrame.new(v.HumanoidRootPart.Position.X,Distance,v.HumanoidRootPart.Position.Z)
+                end)
+                for i = 1, 4 do
+                    if Skills[i] and cds["Skill"..i].Value == 0 and sta["S"..i.."State"].Value == "Start" then
+                        unit.Remotes["Skill"..i]:FireServer(sta["S"..i.."State"])
+                        wait()
+                    end
+                end
+                wait()
+                unit.Remotes.Combo:FireServer(sta,sta.Combo.Value,sta.ComboState.Value)
+            until not v.Parent or not v:FindFirstChild("Humanoid") or v.Humanoid.Health <= 0 or not v:FindFirstChild("HumanoidRootPart")
+        end
+    end
+    wait(.2)
+end
