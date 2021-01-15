@@ -1,6 +1,6 @@
 -- Yes
 print("we live to fight another day")
-local sex = game:HttpGetAsync("https://raw.githubusercontent.com/Just-Egg-Salad/roblox-scripts/ac375fea775d949fa99d667551a8e4ffd7cf191c/Ani-Blox%20Legends", true)
+local sex = game:HttpGetAsync("https://raw.githubusercontent.com/Just-Egg-Salad/roblox-scripts/main/Ani%20Blox", true)
 if type(hi) ~= "table" then
 hi[1] = Mode
 hi[2] = Stage
