@@ -1,0 +1,80 @@
+-- Yes
+local shit = {}
+for i,v in pairs(game.ReplicatedStorage.AdventureInfo:GetChildren()) do
+    if v:IsA("Folder") then
+        table.insert(shit,v.Name)
+    end
+end
+
+-- Decisions
+local hi = {}
+
+-- Yes
+function option(femboy,w)
+    table.insert(hi,femboy)
+    local shit = game.ReplicatedStorage.AdventureInfo:GetDescendants()
+    for i = 1, #shit do local v = shit[i]
+        if v.Name == femboy and v:FindFirstChild("Stage1") then
+            w:Section("Stage")
+            for i,v in pairs(v:GetChildren()) do
+                if v.Name:find("Stage") and v:IsA("Folder") then
+                    local num = v.Name:gsub("Stage","")
+                    w:Button(num, function()
+                        table.insert(hi,num)
+                        start()
+                    end)
+                end
+            end
+        elseif v.Name == femboy then
+            local mayo = {}
+            warn(v)
+            for i,v in pairs(v:GetChildren()) do
+                if v:IsA("Folder") then
+                    print(v)
+                    table.insert(mayo,v.Name)
+                end
+            end
+            w:Dropdown("Settings",{list=mayo},function(new)
+                option(new,w)
+            end)
+        end
+    end
+end
+
+-- UI Library
+local library = loadstring(game:HttpGetAsync("https://pastebin.com/raw/HYcfs6KC"))()
+local w = library:CreateWindow('egg farm')
+w:Section("Skills")
+for i = 1, 4 do
+    w:Toggle(tostring(i), {flag = tostring(i)})
+end
+w:Section("Level Selection")
+w:Dropdown("Settings", {
+    list = shit
+}, function(new)
+    option(new,w)
+end)
+
+-- Start
+function start()
+    local sex = game:HttpGetAsync("https://raw.githubusercontent.com/Just-Egg-Salad/roblox-scripts/main/Ani%20Blox", true)
+    Skills = {
+        [1] = tostring(w.flags["1"]),
+        [2] = tostring(w.flags["2"]),
+        [3] = tostring(w.flags["3"]),
+        [4] = tostring(w.flags["4"])
+    }
+    local str = [[
+    Mode = "]].. hi[1] ..'"\n'..[[
+    Stage = "]].. hi[2] ..'"\n'..[[
+    Level = ]].. hi[3] .."\nSkills = {[1]="..Skills[1]..";[2]="..Skills[2]..";[3]="..Skills[3]..";[4]="..Skills[4].."}\n"..sex
+    setclipboard(str)
+    syn.queue_on_teleport(str)
+    game.ReplicatedStorage.SoloEvent:FireServer(hi[1],hi[2],hi[3])
+    local ok = game.CoreGui:GetChildren()
+    ok[#ok]:Destroy()
+    local yes,cred = pcall(game.HttpGet, game.HttpGet, "https://pastebin.com/raw/vJg6Sa8w", true)
+    if yes then
+        loadstring(cred)()
+    end
+end
