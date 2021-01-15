@@ -1,11 +1,11 @@
 -- Yes
-local sex = game:HttpGetAsync("https://raw.githubusercontent.com/Just-Egg-Salad/roblox-scripts/ac375fea775d949fa99d667551a8e4ffd7cf191c/Ani-Blox%20Legends", true)
-syn.queue_on_teleport([[
-    Mode = ]]..type(hi) == "table" and hi[1] or Mode..[[
-    Stage = ]]..type(hi) == "table" and hi[2] or Stage..[[
-    Level = ]]..type(hi) == "table" and hi[3] or Level..[[
-    \n]]..sex..[[
-]])
+    local sex = game:HttpGetAsync("https://raw.githubusercontent.com/Just-Egg-Salad/roblox-scripts/ac375fea775d949fa99d667551a8e4ffd7cf191c/Ani-Blox%20Legends", true)
+    syn.queue_on_teleport([[
+        Mode = ]]..type(hi) == "table" and hi[1] or Mode..[[\n
+        Stage = ]]..type(hi) == "table" and hi[2] or Stage..[[\n
+        Level = ]]..type(hi) == "table" and hi[3] or Level..[[\n
+        \n]]..sex..[[
+    ]])
 
 -- Game Check
 if game.PlaceId == 5882953768 then
