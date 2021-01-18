@@ -1,0 +1,76 @@
+-- Variable
+local player = game.Players.LocalPlayer
+
+-- Prevent Teleport
+local old;
+old = hookfunction(getrawmetatable(game).__namecall,function(...)
+    local args = {...}
+    if getnamecallmethod() == "Teleport" and args[2] == 5057286085 then
+        return
+    end
+    return old(...)
+end)
+
+-- Get Closest Hanger
+function hanger()
+    local close
+    local dist = 1000
+    local shit = workspace:GetDescendants()
+    for i = 1, #shit do local v = shit[i]
+        if v.Name:lower():find("hanger") and v:FindFirstChildOfClass("ProximityPrompt") then
+            local newDist = player:DistanceFromCharacter(v.Position)
+            if newDist < dist then
+                dist = newDist
+                close = v
+            end
+        end
+    end
+    return close
+end
+
+-- NoClip
+game:GetService("RunService").Stepped:Connect(function()
+    player.Character.Humanoid:ChangeState(11)
+end)
+
+-- Tween
+function tween(ok)
+    game:GetService("TweenService"):Create(player.Character.HumanoidRootPart, TweenInfo.new(player:DistanceFromCharacter(ok.Position)/Speed, Enum.EasingStyle.Linear), {CFrame = ok.CFrame+Vector3.new(0,3,0)}):Play()
+    wait(player:DistanceFromCharacter(ok.Position)/Speed)
+end
+
+-- Grab Hanger
+repeat
+    local ok = hanger()
+    if typeof(ok) == "Instance" then
+        tween(ok)
+        ok:FindFirstChildOfClass("ProximityPrompt").HoldDuration = 0
+        game:GetService("VirtualInputManager"):SendKeyEvent(true,Enum.KeyCode.E,false,game)
+        game:GetService("VirtualInputManager"):SendKeyEvent(false,Enum.KeyCode.E,false,game)
+    end
+    wait(.3)
+until player.Backpack:FindFirstChild("Hanger")
+
+-- Fix this shit
+local e = workspace.Tirolina.Folder.Part:GetChildren()
+for i,v in pairs(e) do
+    if v:IsA("ProximityPrompt") then
+        if v.ObjectText:find("Hanger") then
+            v.Enabled = true
+            v.HoldDuration = 0
+        else
+            v.Enabled = false
+        end
+        print(v.Enabled,v.ObjectText)
+    end
+end
+
+-- Farm Points
+while player.PlayerStats.Points.Value < Points do
+    tween(workspace.Tirolina.Folder.Part)
+    game:GetService("VirtualInputManager"):SendKeyEvent(true,Enum.KeyCode.E,false,game)
+    game:GetService("VirtualInputManager"):SendKeyEvent(false,Enum.KeyCode.E,false,game)
+end
+
+-- Escape
+game.TeleportService.Teleport(game.TeleportService,5057286085)
