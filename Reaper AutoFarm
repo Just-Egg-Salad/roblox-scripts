@@ -37,9 +37,7 @@ while true do
     local shit = workspace.Living:GetChildren()
     for i = 1, #shit do local v = shit[i]
         if table.find(Enemies,v.Name) and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("AI") then
-            print("tp")
             tp(v.HumanoidRootPart.CFrame)
-            print("tp done time to kill")
             repeat
                 pcall(function()
                     player.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.Angles(math.rad(90),0,0) + Vector3.new(0,Distance,0)
@@ -47,7 +45,6 @@ while true do
                 end)
                 wait()
             until not v.Parent or not v:FindFirstChild("Humanoid") or v.Humanoid.Health <= 0
-            print("kill done")
         end
     end
     wait(.2)
