@@ -1,0 +1,54 @@
+-- Variable
+local player = game.Players.LocalPlayer
+local tpPart = workspace.Gargantua
+
+-- Kick Bypass
+local old;
+old = hookfunction(getrawmetatable(game).__namecall,function(...)
+    local method = getnamecallmethod():lower()
+    local args = {...}
+    if method == "kick" or method == "fireserver" and tostring(args[1]) == "YieldFunction" then
+        return
+    end
+    return old(...)
+end)
+
+-- Teleport Bypass
+function tp(cf)
+    if player:FindFirstChild("IgnoreCFrame") then return end
+    local old = tpPart.CFrame
+    repeat
+        wait()
+        pcall(function()
+            tpPart.CFrame = player.Character.HumanoidRootPart.CFrame
+            wait()
+            tpPart.CFrame = old
+        end)
+    until player:FindFirstChild("IgnoreCFrame")
+end
+
+-- NoClip
+game:GetService("RunService").RenderStepped:Connect(function()
+    player.Character.Humanoid:ChangeState(11)
+end)
+
+-- AutoFarm
+while true do
+    local shit = workspace.Living:GetChildren()
+    for i = 1, #shit do local v = shit[i]
+        if table.find(Enemies,v.Name) and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("AI") then
+            print("tp")
+            tp(v.HumanoidRootPart.CFrame)
+            print("tp done time to kill")
+            repeat
+                pcall(function()
+                    player.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.Angles(math.rad(90),0,0) + Vector3.new(0,Distance,0)
+                    player.Backpack.notcombo.R:FireServer({"LightAttack"})
+                end)
+                wait()
+            until not v.Parent or not v:FindFirstChild("Humanoid") or v.Humanoid.Health <= 0
+            print("kill done")
+        end
+    end
+    wait(.2)
+end
