@@ -35,7 +35,7 @@ end)
 
 -- Kiriot ESP
 if syn then
-    local ESP = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
+    ESP = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
     ESP.Overrides.GetTeam = function(p)
         return p:FindFirstChild("team") and p.team.Value
     end
