@@ -1,3 +1,11 @@
+-- Non Synapse Users
+if not pcall(function() return syn.protect_gui end) then
+    syn = {}
+    syn.protect_gui = function(egg)
+        egg.Parent = game.CoreGui
+    end
+end
+
 -- Globals
 Enabled = false
 Enemy = "Thug"
