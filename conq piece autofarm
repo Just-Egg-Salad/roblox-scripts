@@ -55,6 +55,8 @@ end
 local quests = {
     Thug = "Chris",
     Monkey = "MonkeyQuest",
+    ["Buggy Pirate"] = "Rabbit",
+    ["Fishman Pirate"] = "Deirdre"
 }
 
 -- UI Library
@@ -118,11 +120,13 @@ while true do
     local v = enemy()
     if Enabled and typeof(v) == "Instance" then
         -- Quest Check
-        if not player:FindFirstChild("Quest") or not player.Quest:FindFirstChild(Enemy) and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and quests[Enemy] and workspace.NPC:FindFirstChild(quests[Enemy]) then
-            game.ReplicatedStorage.Remote.Talk:FireServer(false)
-            player.Character.HumanoidRootPart.CFrame = workspace.NPC[quests[Enemy]].Head.CFrame - Vector3.new(0,8,0)
-            wait(.3)
-            fireclickdetector(workspace.NPC[quests[Enemy]].ClickDetector, 1)
+        if not player:FindFirstChild("Quest") or not player.Quest:FindFirstChild(Enemy) then
+            pcall(function()
+                game.ReplicatedStorage.Remote.Talk:FireServer(false)
+                player.Character.HumanoidRootPart.CFrame = workspace.NPC[quests[Enemy]].Head.CFrame - Vector3.new(0,8,0)
+                wait(.3)
+                fireclickdetector(workspace.NPC[quests[Enemy]].ClickDetector, 1)
+            end)
         end
         -- Kill Enemy
         repeat
