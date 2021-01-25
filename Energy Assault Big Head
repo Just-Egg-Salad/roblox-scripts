@@ -1,3 +1,8 @@
+-- Globals
+HeadSize = 0
+HColor = Color3.new(1,0,0)
+Trans = 0
+
 -- Bypass Size Check
 local old;
 old = hookfunction(getrawmetatable(game).__namecall,function(...)
@@ -14,33 +19,49 @@ end)
 game:GetService("RunService").Stepped:Connect(function()
     local plrs = game.Players:GetPlayers()
     for i = 2, #plrs do local v = plrs[i]
-        if v:FindFirstChild("team") and v.team.Value ~= game.Players.LocalPlayer.team.Value then
-            pcall(function()
+        if v.Character and v.Character:FindFirstChild("Head") and v.Character:FindFirstChild("health") and v:FindFirstChild("team") and v.team.Value ~= game.Players.LocalPlayer.team.Value then
+            if v.Character.health.Value > 0 then
                 v.Character.Head.Size = Vector3.new(HeadSize,HeadSize,HeadSize)
                 v.Character.Head.CanCollide = false
                 v.Character.Head.Massless = true
-                v.Character.Head.Transparency = 0.7
-                v.Character.Head.CFrame = v.Character.Torso.CFrame * CFrame.new(0,HeadSize/2,0)
-            end)
+                v.Character.Head.Transparency = Trans
+                v.Character.Head.Color = HColor
+            else
+                v.Character.Head:Destroy()
+            end
         end
     end
 end)
 
 -- Kiriot ESP
-local ESP = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
-ESP.Overrides.GetTeam = function(p)
-    return p:FindFirstChild("team") and p.team.Value
-end
-ESP.Overrides.GetColor = function(char)
-    local p = ESP:GetPlrFromChar(char)
-    if p then
-        local team = ESP:GetTeam(p)
-        if team then
-            return team == "blue" and Color3.new(0,0,1) or Color3.new(1,0,0)
-        end
+if syn then
+    local ESP = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
+    ESP.Overrides.GetTeam = function(p)
+        return p:FindFirstChild("team") and p.team.Value
     end
-    return nil
+    ESP.Overrides.GetColor = function(char)
+        local p = ESP:GetPlrFromChar(char)
+        if p then
+            local team = ESP:GetTeam(p)
+            if team then
+                return team == "blue" and Color3.new(0,0,1) or Color3.new(1,0,0)
+            end
+        end
+        return nil
+    end
+    ESP:Toggle(false)
+    ESP.Names = true
+    ESP.Boxes = true
 end
-ESP:Toggle(true)
-ESP.Names = true
-ESP.Boxes = true
+
+-- UI Library
+local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
+local window = library:CreateWindow("assault energy")
+window:AddLabel({text="Made by egg salad"})
+if syn then
+    window:AddToggle({text='Kiriot ESP',callback=function(a)ESP:Toggle(a)end})
+end
+window:AddSlider({text='Head Size',min=2,max=20,callback=function(a)HeadSize=a;end})
+window:AddColor({text='Head Color',callback=function(a)HColor=a;end})
+window:AddSlider({text='Transparency',min=0,max=1,float=0.01,callback=function(a)Trans=a;end})
+library:Init()
