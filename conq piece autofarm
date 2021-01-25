@@ -132,6 +132,10 @@ while true do
                 end
             end
         until not Enabled or Enemy ~= v.Name or not v.Parent or not v:FindFirstChild("Humanoid") or v.Humanoid.Health <= 0
+    elseif Enabled then
+        pcall(function()
+            player.Character.HumanoidRootPart.CFrame = CFrame.new(math.random(1000,9999),1000,math.random(1000,9999))
+        end)
     end
-    wait(.1)
+    wait(.2)
 end
