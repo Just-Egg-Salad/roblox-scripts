@@ -1,4 +1,4 @@
--- Non Synapse Users
+-- Non-Synapse Users
 if not pcall(function() return syn.protect_gui end) then
     syn = {}
     syn.protect_gui = function(egg)
@@ -8,6 +8,8 @@ end
 
 -- Globals
 Enabled = false
+Buso = false
+LastBuso = tick()
 Enemy = "Thug"
 Weapon = "Combat"
 Distance = -9
@@ -67,6 +69,7 @@ local folder = window:AddFolder("Skills")
 for i,v in pairs(Skills) do
     folder:AddToggle({text=i,callback=function(a)Skills[i]=a;end})
 end
+folder:AddToggle({text="Buso",callback=function(a)Buso=a;end})
 library:Init()
 
 -- Get Enemy
@@ -128,6 +131,13 @@ while true do
                 player.Character.HumanoidRootPart.CFrame = CFrame.new(v.HumanoidRootPart.Position) * CFrame.Angles(math.rad(Distance < 0 and 90 or -90), 0, 0) + Vector3.new(0, Distance, 0)
             end)
             wait()
+            -- Buso
+            if Buso and tick()-LastBuso > 1 and player.Character and player.Character:FindFirstChild("Buso") and not player.Character:FindFirstChild("BHaki") and player.Character.Buso.Value == player.Character.Buso.MaxValue then
+                pcall(function()
+                    player.Character.Move.Haki:FireServer("Buso")
+                    LastBuso = tick()
+                end)
+            end
             -- Use Weapon
             local wep = equip()
             for i,bool in pairs(Skills) do
