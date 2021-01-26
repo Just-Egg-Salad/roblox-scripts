@@ -1,16 +1,16 @@
 -- Globals
-HeadSize = 0
-HColor = Color3.new(1,0,0)
-Trans = 0
+HEnabled = false
 InfAmmo = false
+InfJump = false
+GodMode = false
+HeadSize = 0
+Trans = 0
+WalkSpeed = 16
+HColor = Color3.new(1,0,0)
 
--- Non-Synapse Users
-if not pcall(function() return syn.protect_gui end) then
-    syn = {}
-    syn.protect_gui = function(egg)
-        egg.Parent = game.CoreGui
-    end
-end
+-- Variable
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
 
 -- Bypass Size Check
 local old;
@@ -27,26 +27,64 @@ old = hookfunction(getrawmetatable(game).__namecall,function(...)
                     v.ammoinmag = v.magcapacity
                 end
             end
+        elseif args[6] == "fell" and InfJump then
+            return
         end
     end
     return old(...)
 end)
 
--- Big Head
+-- Change WalkSpeed
+function changeVal(nam,val)
+    for i,v in pairs(getgc(true)) do
+        if type(v) == "table" and rawget(v,nam) then
+            v[nam] = val
+        end
+    end 
+end
+
+-- mmmm myes
+player.PlayerGui.ChildAdded:Connect(function(v)
+    wait(.5)
+    -- Grab Code
+    if v.Name == "gunls" then
+        for i,v in pairs(getgc()) do
+            if type(v) == "function" and islclosure(v) and table.find(getupvalues(v),game.HapticService) and tonumber(getupvalue(v,1)) then
+                code = getupvalue(v,1)+55
+                break
+            end
+        end
+    end
+    -- WalkSpeed
+    if WalkSpeed > 16 then
+        changeVal("walkspeed",WalkSpeed)
+        getsenv(v).wsval.Value = WalkSpeed
+    end
+end)
+
+-- Skeet
 game:GetService("RunService").Stepped:Connect(function()
+    -- Hitbox Expander
     local plrs = game.Players:GetPlayers()
     for i = 2, #plrs do local v = plrs[i]
-        if v.Character and v.Character:FindFirstChild("Head") and v.Character:FindFirstChild("health") and v:FindFirstChild("team") and v.team.Value ~= game.Players.LocalPlayer.team.Value then
+        if v.Character and v.Character:FindFirstChild("Head") and v.Character:FindFirstChild("health") and v:FindFirstChild("team") and v.team.Value ~= player.team.Value then
             if v.Character.health.Value > 0 then
-                v.Character.Head.Size = Vector3.new(HeadSize,HeadSize,HeadSize)
+                v.Character.Head.Size = HEnabled and Vector3.new(HeadSize,HeadSize,HeadSize) or Vector3.new(2,1,1)
                 v.Character.Head.CanCollide = false
                 v.Character.Head.Massless = true
                 v.Character.Head.Transparency = Trans
                 v.Character.Head.Color = HColor
             else
-                v.Character.Head:Destroy()
+                v.Character:Destroy()
             end
         end
+    end
+end)
+
+-- Inf Jump
+mouse.KeyDown:Connect(function(femboy)
+    if InfJump and femboy == " " and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end)
 
@@ -73,13 +111,36 @@ end
 
 -- UI Library
 local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
-local window = library:CreateWindow("assault energy")
-window:AddLabel({text="Made by egg salad"})
+local window = library:CreateWindow("salad bowl")
+window:AddLabel({text="discord.gg/uWAMYAgSTT"})
 if syn then
     window:AddToggle({text='Kiriot ESP',callback=function(a)ESP:Toggle(a)end})
 end
 window:AddToggle({text='Inf Ammo',callback=function(a)InfAmmo=a;end})
-window:AddSlider({text='Head Size',min=2,max=50,float=0.5,callback=function(a)HeadSize=a;end})
-window:AddColor({text='Head Color',callback=function(a)HColor=a;end})
-window:AddSlider({text='Transparency',min=0,max=1,float=0.01,callback=function(a)Trans=a;end})
+local hitMod = window:AddFolder("Hitbox")
+local plrMod = window:AddFolder("LocalPlayer")
+hitMod:AddToggle({text='Enabled',callback=function(a)HEnabled=a;end})
+hitMod:AddSlider({text='Head Size',min=2,max=50,float=0.5,callback=function(a)HeadSize=a;end})
+hitMod:AddColor({text='Head Color',callback=function(a)HColor=a;end})
+hitMod:AddSlider({text='Transparency',min=0,max=1,float=0.01,callback=function(a)Trans=a;end})
+plrMod:AddToggle({text='Inf Jump',callback=function(a)InfJump=a;end})
+plrMod:AddToggle({text='GodMode',callback=function(a)GodMode=a;end})
+plrMod:AddSlider({text='WalkSpeed',min=16,max=60,callback=function(a)
+    WalkSpeed = a
+    pcall(function()
+        getsenv(player.PlayerGui.gunls).wsval.Value = a
+        changeVal("walkspeed", a)
+    end)
+end})
 library:Init()
+
+-- GodMode
+while wait(.25) do
+    if not GodMode and player.Character and player.Character:FindFirstChild("shield") and player.Character.shield:IsA("Part") then
+        player.Character.Humanoid.Health = 0
+    end
+    if GodMode and player.Character and player.Character:FindFirstChild("shield") and not player.Character.shield:IsA("Part") then
+        player.Character.shield:Destroy()
+        Instance.new("Part", player.Character).Name = "shield"
+    end
+end
