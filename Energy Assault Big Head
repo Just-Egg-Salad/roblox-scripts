@@ -86,7 +86,7 @@ game:GetService("RunService").Stepped:Connect(function()
                 v.Character.Head.Massless = true
                 v.Character.Head.Transparency = Trans
                 v.Character.Head.Color = HColor
-                if KillAura and player:DistanceFromCharacter(v.Character.Head.Position) < 90 then
+                if KillAura and player:DistanceFromCharacter(v.Character.Head.Position) < 35 then
                     game.ReplicatedStorage.wepevents:FireServer(code,nil,nil,16,"knife",v.Character)
                 end
             else
