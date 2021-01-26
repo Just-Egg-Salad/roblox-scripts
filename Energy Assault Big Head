@@ -4,6 +4,14 @@ HColor = Color3.new(1,0,0)
 Trans = 0
 InfAmmo = false
 
+-- Non-Synapse Users
+if not pcall(function() return syn.protect_gui end) then
+    syn = {}
+    syn.protect_gui = function(egg)
+        egg.Parent = game.CoreGui
+    end
+end
+
 -- Bypass Size Check
 local old;
 old = hookfunction(getrawmetatable(game).__namecall,function(...)
