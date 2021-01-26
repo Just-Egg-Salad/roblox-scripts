@@ -3,8 +3,10 @@ HEnabled = false
 InfAmmo = false
 InfJump = false
 GodMode = false
+KillAura = false
 HeadSize = 0
 Trans = 0
+code = 0
 WalkSpeed = 16
 HColor = Color3.new(1,0,0)
 
@@ -45,7 +47,13 @@ end
 
 -- mmmm myes
 player.PlayerGui.ChildAdded:Connect(function(v)
-    wait(.5)
+    -- WalkSpeed
+    wait(.3)
+    if WalkSpeed > 16 then
+        changeVal("walkspeed",WalkSpeed)
+        getsenv(v).wsval.Value = WalkSpeed
+    end
+    wait(1)
     -- Grab Code
     if v.Name == "gunls" then
         for i,v in pairs(getgc()) do
@@ -54,11 +62,6 @@ player.PlayerGui.ChildAdded:Connect(function(v)
                 break
             end
         end
-    end
-    -- WalkSpeed
-    if WalkSpeed > 16 then
-        changeVal("walkspeed",WalkSpeed)
-        getsenv(v).wsval.Value = WalkSpeed
     end
 end)
 
@@ -74,6 +77,9 @@ game:GetService("RunService").Stepped:Connect(function()
                 v.Character.Head.Massless = true
                 v.Character.Head.Transparency = Trans
                 v.Character.Head.Color = HColor
+                if KillAura and player:DistanceFromCharacter(v.Character.Head.Position) < 90 then
+                    game.ReplicatedStorage.wepevents:FireServer(code,nil,nil,16,"knife",v.Character)
+                end
             else
                 v.Character:Destroy()
             end
@@ -116,7 +122,16 @@ window:AddLabel({text="discord.gg/uWAMYAgSTT"})
 if syn then
     window:AddToggle({text='Kiriot ESP',callback=function(a)ESP:Toggle(a)end})
 end
-window:AddToggle({text='Inf Ammo',callback=function(a)InfAmmo=a;end})
+window:AddToggle({text='Knife Aura',callback=function(a)KillAura=a;end})
+window:AddToggle({text='Inf Ammo',callback=function(a)
+    InfAmmo = a
+    for i,v in pairs(getgc()) do
+        if type(v) == "function" and islclosure(v) and table.find(getupvalues(v),game.HapticService) and tonumber(getupvalue(v,1)) then
+            code = getupvalue(v,1)+55
+            return
+        end
+    end
+end})
 local hitMod = window:AddFolder("Hitbox")
 local plrMod = window:AddFolder("LocalPlayer")
 hitMod:AddToggle({text='Enabled',callback=function(a)HEnabled=a;end})
