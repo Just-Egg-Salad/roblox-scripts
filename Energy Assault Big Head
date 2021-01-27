@@ -4,6 +4,7 @@ InfAmmo = false
 InfJump = false
 GodMode = false
 KillAura = false
+KillAuraRange = 5
 HeadSize = 0
 Trans = 0
 code = 0
@@ -13,15 +14,6 @@ HColor = Color3.new(1,0,0)
 -- Variable
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
-
-  
--- Non-Synapse Users
-if not pcall(function() return syn.protect_gui end) then
-    syn = {}
-    syn.protect_gui = function(egg)
-        egg.Parent = game.CoreGui
-    end
-end
 
 -- Bypass Size Check
 local old;
@@ -86,7 +78,7 @@ game:GetService("RunService").Stepped:Connect(function()
                 v.Character.Head.Massless = true
                 v.Character.Head.Transparency = Trans
                 v.Character.Head.Color = HColor
-                if KillAura and player:DistanceFromCharacter(v.Character.Head.Position) < 35 then
+                if KillAura and player:DistanceFromCharacter(v.Character.Head.Position) < KillAuraRange then
                     game.ReplicatedStorage.wepevents:FireServer(code,nil,nil,16,"knife",v.Character)
                 end
             else
@@ -131,7 +123,6 @@ window:AddLabel({text="discord.gg/uWAMYAgSTT"})
 if syn then
     window:AddToggle({text='Kiriot ESP',callback=function(a)ESP:Toggle(a)end})
 end
-window:AddToggle({text='Knife Aura',callback=function(a)KillAura=a;end})
 window:AddToggle({text='Inf Ammo',callback=function(a)
     InfAmmo = a
     for i,v in pairs(getgc()) do
@@ -141,6 +132,8 @@ window:AddToggle({text='Inf Ammo',callback=function(a)
         end
     end
 end})
+window:AddToggle({text='Knife Aura',callback=function(a)KillAura=a;end})
+window:AddSlider({text='Knife Range',min=6,max=30,float=0.1,callback=function(a)KillAuraRange=a;end})
 local hitMod = window:AddFolder("Hitbox")
 local plrMod = window:AddFolder("LocalPlayer")
 hitMod:AddToggle({text='Enabled',callback=function(a)HEnabled=a;end})
