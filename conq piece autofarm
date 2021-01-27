@@ -186,13 +186,14 @@ end
 -- Geppo Jumps & Table
 function getTable(char)
     local move = char:WaitForChild("Move")
-    wait(.25)
+    wait(1)
     for i,v in pairs(getgc(true)) do
         if type(v) == "table" and rawget(v,"q1") then
             moveTable = v
             if GeppoMax > 8 and player.PlayerStats.Geppo.Value then
                 v.gepomax = GeppoMax
             end
+            return
         end
     end
 end
