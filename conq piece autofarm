@@ -83,7 +83,7 @@ function df(egg)
                 dist = newDist
             end
         end
-        notify("Devil Fruit!","a Devil Fruit has spawned at "..close.Name,60)
+        notify("Devil Fruit!","a Devil Fruit has spawned at "..close.Name,120)
     end
 end
 workspace.Mob.ChildAdded:Connect(df)
@@ -117,7 +117,7 @@ tpFolder:AddButton({text='Devil Fruit TP', callback = function()
             end
         end
     end
-    notify("Failed!","There's no Devil Fruit here",12)
+    notify("Failed!","There's no Devil Fruit in this server",12)
 end})
 local tpList = {}
 for i,v in pairs(workspace.Location:GetChildren()) do
