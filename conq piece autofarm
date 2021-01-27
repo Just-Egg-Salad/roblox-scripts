@@ -10,6 +10,7 @@ end
 Enabled = false
 Buso = false
 Sprint = false
+DFNotify = false
 LastBuso = tick()
 Enemy = "Thug"
 Weapon = "Combat"
@@ -75,6 +76,9 @@ end
 
 -- Devil Fruit Listener
 local fruits = {}
+local audio = Instance.new("Sound",Workspace)
+audio.SoundId = "http://www.roblox.com/asset/?id=4465573536"
+audio.Volume = 2
 function df(egg)
     if egg:IsA("Tool") and not table.find(fruits,egg) then
         table.insert(fruits,egg)
@@ -87,6 +91,9 @@ function df(egg)
                 close = v
                 dist = newDist
             end
+        end
+        if DFNotify then
+            audio:Play()
         end
         notify("Devil Fruit!","a Devil Fruit has spawned at "..close.Name,120)
     end
@@ -165,6 +172,7 @@ if syn then
     miscFolder:AddToggle({text='Kiriot ESP',callback=function(a)ESP:Toggle(a)end})
 end
 miscFolder:AddToggle({text='Auto Sprint',callback=function(a)Sprint=a;end})
+miscFolder:AddToggle({text='Devil Fruit Sound',callback=function(a)DFNotify=a;end})
 if not player.PlayerStats.Geppo.Value then
     miscFolder:AddToggle({text="Geppo (doesn't save)",callback=function(a)player.PlayerStats.Geppo.Value=a;end})
 end
