@@ -23,7 +23,7 @@ Skills = {
 -- Variable
 local player = game.Players.LocalPlayer
 local stats = player.PlayerStats
-local vim = game:GetService("VirtualInputManager")
+local sg = game:GetService("StarterGui")
 local enemies = {}
 local tools = {}
 
@@ -59,39 +59,100 @@ local quests = {
     ["Fishman Pirate"] = "Deirdre"
 }
 
+-- Notify Function
+function notify(title,text,duration)
+    sg:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = duration;
+    })
+end
+
+-- Devil Fruit Listener
+local fruits = {}
+function df(egg)
+    if egg:IsA("Tool") and not table.find(fruits,egg) then
+        table.insert(fruits,egg)
+        local close
+        local dist = math.huge
+        local hand = egg:WaitForChild("Handle")
+        for i,v in pairs(workspace.Location:GetChildren()) do
+            local newDist = (v.Position-hand.Position).magnitude
+            if newDist < dist then
+                close = v
+                dist = newDist
+            end
+        end
+        notify("Devil Fruit!","a Devil Fruit has spawned at "..close.Name,60)
+    end
+end
+workspace.Mob.ChildAdded:Connect(df)
+game.ReplicatedStorage.Storage.ChildAdded:Connect(df)
+
 -- UI Library
 local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
 local window = library:CreateWindow("cock piece 😳")
-window:AddLabel({text="discord.gg/uWAMYAgSTT"})
-window:AddToggle({text='Enabled',callback=function(a)Enabled=a;end})
-window:AddList({text='Target',values=enemies,callback=function(a)Enemy=a;end})
-window:AddList({text='Weapon',values=tools,callback=function(a)Weapon=a;end})
-window:AddSlider({text='Distance',min=-9,max=9,callback=function(a)Distance=a;end})
-local folder = window:AddFolder("Skills")
+-- Farm Stuff
+local autoFolder = window:AddFolder("AutoFarm")
+autoFolder:AddLabel({text="discord.gg/uWAMYAgSTT"})
+autoFolder:AddToggle({text='Enabled',callback=function(a)Enabled=a;end})
+autoFolder:AddList({text='Target',values=enemies,callback=function(a)Enemy=a;end})
+autoFolder:AddList({text='Weapon',values=tools,callback=function(a)Weapon=a;end})
+autoFolder:AddSlider({text='Distance',min=-9,max=9,callback=function(a)Distance=a;end})
+local skillFolder = autoFolder:AddFolder("Skills")
 for i,v in pairs(Skills) do
-    folder:AddToggle({text=i,callback=function(a)Skills[i]=a;end})
+    skillFolder:AddToggle({text=i,callback=function(a)Skills[i]=a;end})
 end
-folder:AddToggle({text="Buso",callback=function(a)Buso=a;end})
-window:AddButton({text='Devil Fruit TP', callback = function()
+skillFolder:AddToggle({text="Buso",callback=function(a)Buso=a;end})
+-- Teleports
+local tpFolder = window:AddFolder("Teleports")
+tpFolder:AddButton({text='Devil Fruit TP', callback = function()
     local shit = {workspace.Mob:GetChildren(),game.ReplicatedStorage.Storage:GetChildren()}
     for i = 1, 2 do
         for i,v in pairs(shit[i]) do
             if v:IsA("Tool") then
-                game:GetService("StarterGui"):SetCore("SendNotification", {
-                    Title = "Success!",
-                    Text = "Ladies and gentlemen, we got em",
-                    Duration = 10;
-                })
+                notify("Success!","Ladies and gentlemen, we got em",12)
                 player.Character.HumanoidRootPart.CFrame = v.Handle.CFrame + Vector3.new(0,3,0)
                 return
             end
         end
     end
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Failed!",
-        Text = "There's no Devil Fruit here",
-        Duration = 10;
-    })
+    notify("Failed!","There's no Devil Fruit here",12)
+end})
+local tpList = {}
+for i,v in pairs(workspace.Location:GetChildren()) do
+    table.insert(tpList,v.Name)
+end
+tpFolder:AddList({text='Locations',values=tpList,callback=function(v)
+    local v = workspace.Location[v]
+    local ground,pos = workspace:FindPartOnRay(Ray.new(v.Position, Vector3.new(0,-2000,0)))
+    local dist = v.Position.Y-pos.Y-6
+    player.Character.HumanoidRootPart.CFrame = v.CFrame - Vector3.new(0,dist,0)
+end})
+local tpList = {}
+for i,v in pairs(workspace.NPC:GetChildren()) do
+    if v.Name ~= "Zago" and v.Name ~= "Gon" then
+        table.insert(tpList,v.Name)
+    end
+end
+tpFolder:AddList({text='NPCs',values=tpList,callback=function(v)
+    local v = workspace.NPC[v].HumanoidRootPart
+    player.Character.HumanoidRootPart.CFrame = v.CFrame * CFrame.new(0,0,-3)
+    player.Character.HumanoidRootPart.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position,v.Position)
+end})
+tpFolder:AddButton({text='Server Hop', callback = function()
+    -- Skidded from Infinite Yield
+    local x = {}
+    for _, v in ipairs(game:GetService("HttpService"):JSONDecode(game:HttpGetAsync("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")).data) do
+        if type(v) == "table" and v.maxPlayers > v.playing and v.id ~= game.JobId then
+            x[#x + 1] = v.id
+        end
+    end
+    if #x > 0 then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, x[math.random(1, #x)])
+    else
+        return notify("Serverhop","Couldn't find a server.",6)
+    end
 end})
 library:Init()
 
@@ -122,7 +183,7 @@ end
 
 -- Quest
 player.PlayerGui.ChildAdded:Connect(function(v)
-    wait()
+    wait(.2)
     if v.Name == "Talk" and Enabled then
         game.ReplicatedStorage.Remote.Talk:FireServer(true,{Name=Enemy})
     end
@@ -144,9 +205,10 @@ while true do
         if not player:FindFirstChild("Quest") or not player.Quest:FindFirstChild(Enemy) then
             pcall(function()
                 game.ReplicatedStorage.Remote.Talk:FireServer(false)
-                player.Character.HumanoidRootPart.CFrame = workspace.NPC[quests[Enemy]].Head.CFrame - Vector3.new(0,8,0)
+                player.Character.HumanoidRootPart.CFrame = workspace.NPC[quests[Enemy]].Head.CFrame * CFrame.Angles(math.rad(Distance < 0 and 90 or -90), 0, 0) + Vector3.new(0, Distance, 0)
                 wait(.3)
                 fireclickdetector(workspace.NPC[quests[Enemy]].ClickDetector, 1)
+                wait(.2)
             end)
         end
         -- Kill Enemy
