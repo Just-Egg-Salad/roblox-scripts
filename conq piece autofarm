@@ -9,21 +9,26 @@ end
 -- Globals
 Enabled = false
 Buso = false
+Sprint = false
 LastBuso = tick()
 Enemy = "Thug"
 Weapon = "Combat"
 Distance = -9
+GeppoMax = 8
+DashCD = 1.3
 Skills = {
     Z = false,
     X = false,
     C = false,
     V = false
 }
+moveTable = nil
 
 -- Variable
 local player = game.Players.LocalPlayer
 local stats = player.PlayerStats
 local sg = game:GetService("StarterGui")
+local uis = game:GetService("UserInputService")
 local enemies = {}
 local tools = {}
 
@@ -98,7 +103,7 @@ autoFolder:AddLabel({text="discord.gg/uWAMYAgSTT"})
 autoFolder:AddToggle({text='Enabled',callback=function(a)Enabled=a;end})
 autoFolder:AddList({text='Target',values=enemies,callback=function(a)Enemy=a;end})
 autoFolder:AddList({text='Weapon',values=tools,callback=function(a)Weapon=a;end})
-autoFolder:AddSlider({text='Distance',min=-9,max=9,callback=function(a)Distance=a;end})
+autoFolder:AddSlider({text='Distance',min=-9,max=9,float=0.5,callback=function(a)Distance=a;end})
 local skillFolder = autoFolder:AddFolder("Skills")
 for i,v in pairs(Skills) do
     skillFolder:AddToggle({text=i,callback=function(a)Skills[i]=a;end})
@@ -154,7 +159,57 @@ tpFolder:AddButton({text='Server Hop', callback = function()
         return notify("Serverhop","Couldn't find a server.",6)
     end
 end})
+-- Misc
+local miscFolder = window:AddFolder("Misc")
+if syn then
+    miscFolder:AddToggle({text='Kiriot ESP',callback=function(a)ESP:Toggle(a)end})
+end
+miscFolder:AddToggle({text='Auto Sprint',callback=function(a)Sprint=a;end})
+if not player.PlayerStats.Geppo.Value then
+    miscFolder:AddToggle({text="Geppo (doesn't save)",callback=function(a)player.PlayerStats.Geppo.Value=a;end})
+end
+miscFolder:AddSlider({text='Geppo Jumps',min=8,max=24,callback=function(a)
+    if player.PlayerStats.Geppo.Value and moveTable then
+        moveTable.gepomax = a
+    end
+end})
 library:Init()
+
+-- Kiriot ESP
+if syn then
+    ESP = loadstring(game:HttpGet("https://kiriot22.com/releases/ESP.lua"))()
+    ESP:Toggle(false)
+    ESP.Names = true
+    ESP.Boxes = true
+end
+
+-- Geppo Jumps & Table
+function getTable(char)
+    local move = char:WaitForChild("Move")
+    wait(.25)
+    for i,v in pairs(getgc(true)) do
+        if type(v) == "table" and rawget(v,"q1") then
+            moveTable = v
+            if GeppoMax > 8 and player.PlayerStats.Geppo.Value then
+                v.gepomax = GeppoMax
+            end
+        end
+    end
+end
+player.CharacterAdded:Connect(getTable)
+getTable(player.Character)
+
+-- Always Sprint
+uis.InputBegan:Connect(function(cum)
+    if moveTable and Sprint and cum.KeyCode.Name == "W" then
+        moveTable.q1.can = false
+        moveTable.q1.now = 2
+        delay(0.3, function()
+            moveTable.q1.can = true
+            moveTable.q1.now = 0
+        end)
+    end
+end)
 
 -- Get Enemy
 function enemy()
@@ -237,6 +292,7 @@ while true do
                 end
             end
         until not Enabled or Enemy ~= v.Name or not v.Parent or not v:FindFirstChild("Humanoid") or v.Humanoid.Health <= 0
+    -- Go to random location
     elseif Enabled then
         pcall(function()
             player.Character.HumanoidRootPart.CFrame = CFrame.new(math.random(1000,9999),1000,math.random(1000,9999))
