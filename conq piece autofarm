@@ -62,7 +62,7 @@ local quests = {
 -- UI Library
 local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
 local window = library:CreateWindow("cock piece 😳")
-window:AddLabel({text="Made by egg salad#3112"})
+window:AddLabel({text="discord.gg/uWAMYAgSTT"})
 window:AddToggle({text='Enabled',callback=function(a)Enabled=a;end})
 window:AddList({text='Target',values=enemies,callback=function(a)Enemy=a;end})
 window:AddList({text='Weapon',values=tools,callback=function(a)Weapon=a;end})
@@ -72,6 +72,27 @@ for i,v in pairs(Skills) do
     folder:AddToggle({text=i,callback=function(a)Skills[i]=a;end})
 end
 folder:AddToggle({text="Buso",callback=function(a)Buso=a;end})
+window:AddButton({text='Devil Fruit TP', callback = function()
+    local shit = {workspace.Mob:GetChildren(),game.ReplicatedStorage.Storage:GetChildren()}
+    for i = 1, 2 do
+        for i,v in pairs(shit[i]) do
+            if v:IsA("Tool") then
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "Success!",
+                    Text = "Ladies and gentlemen, we got em",
+                    Duration = 10;
+                })
+                player.Character.HumanoidRootPart.CFrame = v.Handle.CFrame + Vector3.new(0,3,0)
+                return
+            end
+        end
+    end
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Failed!",
+        Text = "There's no Devil Fruit here",
+        Duration = 10;
+    })
+end})
 library:Init()
 
 -- Get Enemy
