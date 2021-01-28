@@ -1,0 +1,70 @@
+-- Globals
+timer = 3 -- How long it should upgrade loop (adjustable cause of despawn timer varying)
+
+-- Exploit Check
+if sethiddenprop and isnetworkowner then else
+    return game:Shutdown()
+end
+
+-- SimulationRadius
+sethiddenprop(game.Players.LocalPlayer,"MaxSimulationRadius",math.huge)
+sethiddenprop(game.Players.LocalPlayer,"SimulationRadius",math.huge)
+
+-- Variables
+local player = game.Players.LocalPlayer
+local femboy = game:GetService("RunService")
+local tycoons = workspace["Slime Tycoon"].Tycoons
+local collector,color = (function()
+    for i,v in pairs(tycoons:GetChildren()) do
+        if v.Owner.Value == player then
+            return v.PurchasedObjects["Slime Mine1"].Conveyor.Collector,v.Name
+        end
+    end
+end)()
+
+-- Get best upgrader
+function upgrader()
+    -- Check if you have the good upgrader
+    local good = tycoons[color].PurchasedObjects:FindFirstChild("Mystic Refiner")
+    if good then return good end
+    -- Non Rebirth Upgrader
+    local shit = tycoons[color].PurchasedObjects:GetChildren()
+    for i = #shit, 1, -1 do local v = shit[i]
+        if v:FindFirstChild("Upgrader") then
+            return v
+        end
+    end
+end
+
+-- Upgrade Loop!
+function upgradeLoop(yes)
+    -- Timer & Get best upgrader
+    local up = upgrader()
+    local haha = tick()
+    if typeof(up) ~= "Instance" then return end
+    -- Loop Upgrade
+    Instance.new("Part",yes).Name = "EGG"
+    yes.CanCollide = false
+    repeat
+        yes.CFrame = player.Character.HumanoidRootPart.CFrame + Vector3.new(0,5,0)
+        femboy.Stepped:wait()
+        yes.CFrame = up.Upgrader.CFrame
+        yes.Velocity = Vector3.new()
+        femboy.Stepped:wait()
+    until tick()-haha >= timer or not yes.Parent
+    -- Send to collector
+    yes.CFrame = collector.CFrame + Vector3.new(0,2,0)
+end
+
+-- Get the stuff
+while true do
+    local shit = workspace.PartStorage:GetChildren()
+    for i = 1, #shit do local v = shit[i]
+        if isnetworkowner(v) and not v:FindFirstChild("EGG") then
+            spawn(function()
+                upgradeLoop(v)
+            end)
+        end
+    end
+    wait(.1)
+end
