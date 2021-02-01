@@ -1,0 +1,90 @@
+-- Globals
+Enabled = false
+Distance = 7
+npcs = {}
+
+-- Variable
+local player = game.Players.LocalPlayer
+
+-- Get NPCs
+for i,v in pairs(workspace.Mob_Spawns:GetChildren()) do
+    npcs[v.Name] = false
+end
+
+-- NoClip
+game:GetService("RunService").Stepped:Connect(function()
+    if Enabled then
+        player.Character.Humanoid:ChangeState(11)
+    end
+end)
+
+-- TP Bypass
+local old;
+old = hookfunction(getrawmetatable(game).__namecall,function(...)
+    local args = {...}
+    local method = getnamecallmethod()
+    if method == "Kick" then
+        return wait(1e17)
+    elseif method == "InvokeServer" and args[2] == "ReturnCanTP" then
+        return true
+    elseif Enabled and not checkcaller() and method == "FireServer" and (args[2] == "UpdateState" or args[2] == "InputEnded" or args[2] == "InputBegan") then
+        return
+    end
+    return old(...)
+end)
+
+-- Disable NPC
+function disable(v)
+    local ai = v:FindFirstChild("AIHandler")
+    if ai then
+        player.Character.RemoteEvent:FireServer("RemoveForce", {Force=v.AIHandler})
+    end
+end
+
+-- Get Enemy
+function enemy()
+    local npc
+    local reward = 0
+    local shit = workspace.Living:GetChildren()
+    for i = 1, #shit do local v = shit[i]
+        if npcs[v.Name] and v:FindFirstChild("Money") and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Health") and v.Health.Value > 0 then
+            local m = v.Money.Value
+            if m > reward then
+                reward = m
+                npc = v
+            end
+        end
+    end
+    return npc
+end
+
+-- UI Library
+local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
+local window = library:CreateWindow("cock and ball")
+window:AddLabel({text = "Made by egg salad"})
+window:AddToggle({text='Enabled',callback=function(a)Enabled=a;end})
+window:AddSlider({text='Distance',min=-9,max=9,float=0.25,value=Distance,callback=function(a)Distance=a;end})
+local folder = window:AddFolder("Targets")
+for i,v in pairs(npcs) do
+    folder:AddToggle({text=i,callback=function(a)npcs[i]=a;end})
+end
+library:Init()
+
+-- Skeet
+while true do
+    local v = enemy()
+    if Enabled and typeof(v) == "Instance" then
+        disable(v)
+        repeat
+            if player.Character and player.Character:FindFirstChild("RemoteEvent") and not player.Character:FindFirstChildOfClass("Model") then
+                player.Character.RemoteEvent:FireServer("InputEnded",{Input=Enum.KeyCode[player.PlayerStats.StandKey.Value]})
+            end
+            wait()
+            pcall(function()
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(v.HumanoidRootPart.Position) * CFrame.Angles(math.rad(Distance < 0 and 90 or -90), 0, 0) + Vector3.new(0, Distance, 0)
+                player.Character.RemoteEvent:FireServer("InputEnded", {Input=Enum.UserInputType.MouseButton1})
+            end)
+        until not Enabled or not npcs[v.Name] or not v.Parent or not v:FindFirstChild("Health") or v.Health.Value <= 0
+    end
+    wait(.1)
+end
