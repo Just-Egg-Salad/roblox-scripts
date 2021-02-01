@@ -1,5 +1,6 @@
 -- Globals
 Enabled = false
+Kick = false
 Distance = 7
 npcs = {}
 
@@ -58,11 +59,32 @@ function enemy()
     return npc
 end
 
+-- Player Remover
+game.Players.PlayerAdded:Connect(function(v)
+    wait()
+    if Kick then
+        local char = player.Character or player.CharacterAdded
+        local event = char:WaitForChild("RemoteEvent")
+        event:FireServer("RemoveForce", {Force=v})
+    end
+end)
+
 -- UI Library
 local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
 local window = library:CreateWindow("cock and ball")
 window:AddLabel({text = "Made by egg salad"})
 window:AddToggle({text='Enabled',callback=function(a)Enabled=a;end})
+window:AddToggle({text="Kick Everyone",callback=function(a)
+    Kick = a
+    if a then
+        local femboy = game.Players:GetPlayers()
+        for i = 2, #femboy do local v = femboy[i]
+            pcall(function()
+                player.Character.RemoteEvent:FireServer("RemoveForce", {Force=v})
+            end)
+        end
+    end
+end})
 window:AddSlider({text='Distance',min=-9,max=9,float=0.25,value=Distance,callback=function(a)Distance=a;end})
 local folder = window:AddFolder("Targets")
 for i,v in pairs(npcs) do
@@ -76,14 +98,11 @@ while true do
     if Enabled and typeof(v) == "Instance" then
         disable(v)
         repeat
-            if player.Character and player.Character:FindFirstChild("RemoteEvent") and not player.Character:FindFirstChildOfClass("Model") then
-                player.Character.RemoteEvent:FireServer("InputEnded",{Input=Enum.KeyCode[player.PlayerStats.StandKey.Value]})
-            end
-            wait()
             pcall(function()
                 player.Character.HumanoidRootPart.CFrame = CFrame.new(v.HumanoidRootPart.Position) * CFrame.Angles(math.rad(Distance < 0 and 90 or -90), 0, 0) + Vector3.new(0, Distance, 0)
                 player.Character.RemoteEvent:FireServer("InputEnded", {Input=Enum.UserInputType.MouseButton1})
             end)
+            wait()
         until not Enabled or not npcs[v.Name] or not v.Parent or not v:FindFirstChild("Health") or v.Health.Value <= 0
     end
     wait(.1)
