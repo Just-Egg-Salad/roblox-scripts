@@ -60,9 +60,12 @@ end
 -- Quest
 local quests = {
     Thug = "Chris",
-    Monkey = "MonkeyQuest",
+    Monkey = "Aiden",
+    Marine = "Luffy",
     ["Buggy Pirate"] = "Rabbit",
-    ["Fishman Pirate"] = "Deirdre"
+    ["Fishman Pirate"] = "Deirdre",
+    ["Krieg Pirate"] = "Soma",
+    ["Desert Bandit"] = "Gerus"
 }
 
 -- Notify Function
