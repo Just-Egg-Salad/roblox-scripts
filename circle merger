@@ -1,0 +1,59 @@
+-- Enabled
+Enabled = false
+
+-- Variable
+local vim = game:GetService("VirtualInputManager")
+local player = game.Players.LocalPlayer
+local main = player.PlayerGui.Game.PlayFrame.Main
+local stuff = main.Field.Objects
+
+-- Get Match
+function match(img)
+    local shit = stuff:GetChildren()
+    for i = 1, #shit do local v = shit[i]
+        if v.Visible and v:FindFirstChild("Image") and v.Image.Image == img.Image.Image and v ~= img then
+            return v
+        end
+    end
+    return false
+end
+
+-- UI Library
+local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
+local window = library:CreateWindow("salad bowl")
+window:AddLabel({text = "discord.gg/uWAMYAgSTT"})
+window:AddBind({text='Toggle',callback=function()
+    Enabled = not Enabled
+end})
+library:Init()
+
+-- Skeet
+while true do
+    if Enabled then
+        -- Auto Merge
+        for i,v in pairs(stuff:GetChildren()) do
+            if Enabled and v.Visible and v:FindFirstChild("Image") and v.Image.Image ~= "rbxassetid://5134453133" then
+                local sex = match(v)
+                if sex then
+                    vim:SendMouseMoveEvent(v.AbsolutePosition.X+v.AbsoluteSize.X/2,v.AbsolutePosition.Y+v.AbsoluteSize.Y/2,game)
+                    wait()
+                    vim:SendMouseButtonEvent(v.AbsolutePosition.X+v.AbsoluteSize.X/2,v.AbsolutePosition.Y+v.AbsoluteSize.Y/2,0,true,game,1)
+                    wait()
+                    vim:SendMouseMoveEvent(sex.AbsolutePosition.X+sex.AbsoluteSize.X/2,sex.AbsolutePosition.Y+sex.AbsoluteSize.Y/2,game)
+                    wait()
+                    vim:SendMouseButtonEvent(sex.AbsolutePosition.X+sex.AbsoluteSize.X/2,sex.AbsolutePosition.Y+sex.AbsoluteSize.Y/2,0,false,game,1)
+                    wait(.1)
+                end
+            end
+        end
+        -- Auto Upgrade
+        for i = 1, 2 do local mayo = main.CU[i].Buy
+            if mayo.Price.TextColor3 ~= Color3.new(1,0,0) then
+                vim:SendMouseButtonEvent(mayo.Buy.AbsolutePosition.X+mayo.Buy.AbsoluteSize.X/2,mayo.Buy.AbsolutePosition.Y+50,0,true,game,1)
+                vim:SendMouseButtonEvent(mayo.Buy.AbsolutePosition.X+mayo.Buy.AbsoluteSize.X/2,mayo.Buy.AbsolutePosition.Y+50,0,false,game,1)
+                wait(.1)
+            end
+        end
+    end
+    wait(.1)
+end
