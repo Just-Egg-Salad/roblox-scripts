@@ -1,0 +1,460 @@
+--// Tables //
+local hexTable = {
+    ["61"] = "a",
+    ["62"] = "b",
+    ["63"] = "c",
+    ["64"] = "d",
+    ["65"] = "e",
+    ["66"] = "f",
+    ["67"] = "g",
+    ["68"] = "h",
+    ["69"] = "i",
+    ["6A"] = "j",
+    ["6B"] = "k",
+    ["6C"] = "l",
+    ["6D"] = "m",
+    ["6E"] = "n",
+    ["6F"] = "o",
+    ["70"] = "p",
+    ["71"] = "q",
+    ["72"] = "r",
+    ["73"] = "s",
+    ["74"] = "t",
+    ["75"] = "u",
+    ["76"] = "v",
+    ["77"] = "w",
+    ["78"] = "x",
+    ["79"] = "y",
+    ["7A"] = "z",
+}
+local mathTable = {
+    A = 1,
+    B = 3,
+    C = 7,
+    D = 2,
+    E = 4,
+    F = 5,
+    G = 6,
+    H = 0,
+    I = 8,
+    J = 9,
+}
+local colorTable = {
+    ["Bright blue"] = 1,
+    ["Bright red"] = 0,
+    ["New Yeller"] = 2,
+    ["Medium stone grey"] = 3,
+    ["Dark green"] = 0,
+    R = 1,
+    G = 3,
+    B = 2,
+    Y = 3,
+    W = 4,
+}
+local timingTable = {
+    A = 4,
+    B = 3,
+    C = 7,
+    D = 9,
+}
+local tilesTable = {
+    Pink = 6,
+    ["Bright red"] = 1,
+    Cyan = 7,
+    ["Forest green"] = 9,
+    ["New Yeller"] = 2,
+    ["Institutional white"] = 5
+}
+
+--// Functions //
+function getLabel(p)
+    -- Return TextLabel
+    return p:FindFirstChildOfClass("SurfaceGui"):FindFirstChildOfClass("TextLabel")
+end
+function click(btn,am)
+    -- Click button 'am' amount of times
+    for i = 1, am do
+        fireclickdetector(btn:FindFirstChildOfClass("ClickDetector"),1)
+        wait(.1)
+    end
+end
+function getBinary(btn)
+    -- Prepare Info
+    local info = {All=nil,ONE={},ZERO={},ORDER={}}
+    -- Get Light Info
+    for i = 1, 7 do local v = btn.Lights["light"..i]
+        info.ORDER[i] = v
+        table.insert(v.BrickColor == BrickColor.new("White") and info.ONE or info.ZERO, v)
+    end
+    -- Check if all lit
+    info.All = #info.ONE == 7 and "ONE" or #info.ZERO == 7 and "ZERO" or nil
+    return info
+end
+function getWire(btn)
+    -- Prepare Info
+    local info = {}
+    -- Get Wire Info
+    for i,v in pairs(btn:GetChildren()) do
+        info[tostring(v.BrickColor)] = info[tostring(v.BrickColor)] or 0 + 1
+    end
+    return info
+end
+function colorC(a,b)
+    -- Compare Colors
+    return a.BrickColor == BrickColor.new(b)
+end
+
+--// Rules //
+local rules = {
+    Button = function(btn)
+        -- If button is blue and it says "Detonate", click the button
+        if colorC(btn.Label, "Bright blue") and getLabel(btn.Label).Text == "Detonate" then
+            click(btn.Label,1)
+            click(btn.down,1)
+            return
+        end
+        -- If the button is red, click the button twice
+        if colorC(btn.Label, "Bright red") then
+            click(btn.Label,2)
+            click(btn.down,1)
+            return
+        end
+        -- If the button says "Abort", click the button 3 times
+        if getLabel(btn.Label).Text == "Abort" then
+            click(btn.Label,3)
+            click(btn.up,1)
+            return
+        end
+        -- If the button is grey or white, click the button 4 times
+        if colorC(btn.Label, "White") then
+            click(btn.Label,4)
+            click(btn.up,1)
+            return
+        end
+    end,
+    Binary = function(btn)
+        -- Get Lights
+        local info = getBinary(btn)
+        -- [1] If there are no lit indicators, click red once
+        if info.All == "ZERO" then
+            click(btn.redb,1)
+            click(btn.greenb,1)
+            return
+        end
+        -- [2] If light 2 is a ONE and light 7 is a ZERO, click red twice
+        if colorC(info.ORDER[2], "White") and colorC(info.ORDER[7], "Really black") then
+            click(btn.redb,2)
+            click(btn.greenb,1)
+            return
+        end
+        -- [3] If light 1 and 2 are both ONEs, click red three times
+        if colorC(info.ORDER[1], "White") and colorC(info.ORDER[2], "White") then
+            click(btn.redb,3)
+            click(btn.greenb,1)
+            return
+        end
+        -- [4] If light 1 is a ZERO and light 7 is a ZERO, click red four times
+        if colorC(info.ORDER[1], "Really black") and colorC(info.ORDER[7], "Really black") then
+            click(btn.redb,4)
+            click(btn.greenb,1)
+            return
+        end
+        -- [5] If lights 1, 2 and 3 are ONEs, click red five times
+        if colorC(info.ORDER[1], "White") and colorC(info.ORDER[2], "White") and colorC(info.ORDER[3], "White") then
+            click(btn.redb,5)
+            click(btn.greenb,1)
+            return
+        end
+        -- [6] If lights 1, 2, and 4 are ONEs, click red six times
+        if colorC(info.ORDER[1], "White") and colorC(info.ORDER[2], "White") and colorC(info.ORDER[3], "White") and colorC(info.ORDER[4], "White") then
+            click(btn.redb,6)
+            click(btn.greenb,1)
+            return
+        end
+        -- [7] If more than 3 lights are off, click red seven times
+        if #info.ZERO > 3 then
+            click(btn.redb,7)
+            click(btn.greenb,1)
+            return
+        end
+        -- [8] If more than 5 lights are on, click red eight times
+        if #info.ONE > 5 then
+            click(btn.redb,8)
+            click(btn.greenb,1)
+            return
+        end
+        -- [9] If all the indicators are on, click red nine times
+        if info.All == "ONE" then
+            click(btn.redb,9)
+            click(btn.greenb,1)
+            return
+        end
+        -- [10] If none of the above apply, click red ten times
+        click(btn.redb,10)
+        click(btn.greenb,1)
+    end,
+    Hexadecimal = function(btn)
+        -- Get Answer
+        local hex = getLabel(btn.display).Text:split(" ")
+        local answer = ""
+        for i = 2, 5 do
+            answer = answer .. hexTable[hex[i]]
+        end
+        -- Enter Answer
+        btn.check:InvokeServer(answer)
+        click(btn.submit,1)
+    end,
+    Mathematics = function(btn)
+        -- Get Answer
+        local math = getLabel(btn.display).Text:split(" ")
+        local nums = {}
+        for i = 1, 2 do local v = math[i]
+            local num = ""
+            for i = 1, 2 do
+                num = num .. mathTable[v:sub(i,i)]
+            end
+            table.insert(nums,num)
+        end
+        -- Enter Answer
+        local answer = tonumber(nums[1]) * tonumber(nums[2])
+        btn.check:InvokeServer(answer)
+        click(btn.submit,1)
+    end,
+    Keypad = function(btn)
+        -- Var
+        local X = 0
+        -- Button 1
+        local b1 = tonumber(getLabel(btn.b1).Text)
+        if b1 < 10 then
+            X = 15
+        elseif b1 > 10 and b1 < 20 then
+            X = 20
+        elseif b1 > 20 and b1 < 80 then
+            X = 30
+        else
+            X = 10
+        end
+        -- Button 2
+        local b2 = tonumber(getLabel(btn.b2).Text)
+        if b2 < 10 then
+            X = X + 10
+        elseif b2 > 10 and b2 < 20 then
+            X = X * 2
+        elseif b2 > 20 and b2 < 80 then
+            X = X * 3
+        else
+            X = X - 10
+        end
+        -- Button 3
+        local b3 = tonumber(getLabel(btn.b3).Text)
+        if b3 < 10 then
+            X = X * 2
+        elseif b3 > 10 and b3 < 20 then
+            X = X * 3
+        elseif b3 > 20 and b3 < 80 then
+            X = X - 5
+        end
+        -- Button 4
+        local b4 = tonumber(getLabel(btn.b4).Text)
+        if b4 < 10 then
+            X = X * 2
+        elseif b4 > 10 and b4 < 20 then
+            X = X + 20
+        elseif b4 > 20 and b4 < 80 then
+            X = X + 50
+        else
+            X = X * 3
+        end
+        -- Attention!
+        local Y = (b1+b2+b3+b4)/2
+        local Z = X-Y
+        -- Order Rule
+        if Z <= 0 then
+            for i = 1, 4 do
+                click(btn["b"..i],1)
+            end
+        elseif Z >= 0.5 and Z <= 19.5 then
+            click(btn.b1,1)
+            click(btn.b2,1)
+            click(btn.b4,1)
+            click(btn.b3,1)
+        elseif Z >= 20 and Z <= 49.5 then
+            for i = 4, 1, -1 do
+                click(btn["b"..i],1)
+            end
+        elseif Z >= 50 and Z <= 89.5 then
+            click(btn.b3,1)
+            click(btn.b1,1)
+            click(btn.b4,1)
+            click(btn.b2,1)
+        else
+            click(btn.b2,1)
+            click(btn.b3,1)
+            click(btn.b1,1)
+            click(btn.b4,1)
+        end
+    end,
+    ["Color Code"] = function(btn)
+        -- Get X
+        local label = getLabel(btn.display).Text
+        local X = 0
+        for i = 1, #label do local v = label:sub(i,i)
+            X = X + colorTable[v]
+        end
+        -- Get Y
+        local Y = 0
+        for i = 1, 5 do local v = tostring(btn.Lights["NeonThing"..i].BrickColor)
+            Y = Y + colorTable[v]
+        end
+        -- Get Answer
+        local Z = X - Y
+        if Z > 0 then
+            click(btn.cbred,Z)
+        end
+        click(btn.cbgreen,1)
+    end,
+    Timing = function(btn)
+        -- Var
+        local display = getLabel(btn.display).Text
+        -- Get X
+        local X = display:split(" ")[1]
+        local X = X:sub(1,1)+X:sub(2,2)
+        -- Get Y
+        local Y = display:split(" ")[2]
+        local Y = timingTable[Y:sub(1,1)]+timingTable[Y:sub(2,2)]
+        -- Get Answer
+        local Z = X * Y
+        local Color = "White"
+        if Z >= 60 and Z <= 99 or Z >= 500 and Z <= 599 then
+            Color = "Bright red"
+        elseif Z >= 100 and Z <= 199 or Z >= 400 and Z <= 499 then
+            Color = "Bright yellow"
+        elseif Z >= 200 and Z <= 299 then
+            Color = "Dark green"
+        elseif Z >= 300 and Z <= 399 then
+            Color = "Bright blue"
+        end
+        -- Click
+        repeat
+            wait(.1)
+        until colorC(btn.light,Color)
+        click(btn.submit,1)
+    end,
+    Multibuttons = function(btn)
+        -- Var
+        local display = getLabel(btn.display).Text
+        local red,yellow,blue = false,false,false
+        -- Column 1
+        if tonumber(display:sub(1,1)) < 6 then
+            click(btn.red, 1)
+            red = true
+        else
+            click(btn.orange, 1)
+        end
+        -- Column 2
+        if tonumber(display:sub(2,2)) < 6 then
+            click(btn.yellow, 1)
+            yellow = true
+        else
+            click(btn.green, 1)
+        end
+        -- Column 3
+        if tonumber(display:sub(3,3)) < 6 then
+            click(btn.blue, 1)
+            blue = true
+        else
+            click(btn.purple, 1)
+        end
+        -- Each written order
+        if tonumber(display:sub(4,4)) < 7 then
+            click(yellow and btn.green or btn.yellow, 1)
+            click(blue and btn.purple or btn.blue, 1)
+            click(red and btn.orange or btn.red, 1)
+        elseif tonumber(display:sub(5,5)) < 7 then
+            click(blue and btn.purple or btn.blue, 1)
+            click(yellow and btn.green or btn.yellow, 1)
+            click(red and btn.orange or btn.red, 1)
+        elseif tonumber(display:sub(6,6)) > 5 then
+            click(red and btn.orange or btn.red, 1)
+            click(yellow and btn.green or btn.yellow, 1)
+            click(blue and btn.purple or btn.blue, 1)
+        else
+            click(red and btn.orange or btn.red, 1)
+            click(blue and btn.purple or btn.blue, 1)
+            click(yellow and btn.green or btn.yellow, 1)
+        end
+    end,
+    ["Morse Code"] = function(btn)
+        -- Var
+        local ser = getLabel(btn.Parent.SN).Text
+        -- Enter Answer
+        btn.check:InvokeServer(btn.Word.Value)
+        if ser:find("A") or ser:find("1") then
+            click(btn.yellowsubmit,1)
+        else
+            click(btn.bluesubmit,1)
+        end
+    end,
+    Tiles = function(btn)
+        -- Enter Answer
+        btn.check:InvokeServer(tilesTable[tostring(btn.Tilers.Tile1.BrickColor)]+tilesTable[tostring(btn.Tilers.Tile2.BrickColor)])
+        click(btn.submit,1)
+    end,
+    SimpleWires = function(btn)
+        -- Variable
+        local case = btn:FindFirstChildOfClass("Model")
+        local uncut = case.UnCut
+        local am = #uncut:GetChildren()
+        local info = getWire(uncut)
+        -- Check
+        if am == 3 then
+            if info["Really red"] == nil then
+                click(uncut.Wire1,1)
+            elseif info["Institutional white"] then
+                click(uncut.Wire2,1)
+            else
+                click(uncut["Wire"..#uncut:GetChildren()],1)
+            end
+        elseif am == 4 then
+            if info["Bright green"] == nil then
+                click(uncut.Wire1,1)
+            elseif info["Bright blue"] == nil then
+                click(uncut.Wire2,1)
+            elseif info["Institutional white"] == nil then
+                click(uncut.Wire3,1)
+            else
+                click(uncut["Wire"..#uncut:GetChildren()],1)
+            end
+        elseif am == 5 then
+            if colorC(case.light,"Bright red") then
+                click(uncut.Wire1,1)
+            elseif colorC(case.light, "Lime green") then
+                click(uncut.Wire2,1)
+            elseif colorC(case.light, "Electric blue") then
+                click(uncut.Wire3,1)
+            elseif colorC(case.light, "New Yeller") then
+                click(uncut.Wire4,1)
+            else
+                click(uncut["Wire"..#uncut:GetChildren()],1)
+            end
+        end
+    end
+}
+
+--// Solve It //
+function solve()
+    for i,v in pairs(workspace.BombStorage.Bomb:GetChildren()) do
+        if rules[v.Name] then
+            spawn(function()
+                rules[v.Name](v)
+            end)
+        end
+    end
+end
+
+-- UI Library
+local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
+local window = library:CreateWindow("salad bowl")
+window:AddLabel({text = "discord.gg/uWAMYAgSTT"})
+window:AddButton({text='Solve',callback=solve})
+library:Init()
