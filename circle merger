@@ -1,11 +1,24 @@
 -- Enabled
 Enabled = false
+Reset = false
+ResetTimer = 5
+LastReset = tick()
 
--- Variable
+-- Variables
 local vim = game:GetService("VirtualInputManager")
 local player = game.Players.LocalPlayer
-local main = player.PlayerGui.Game.PlayFrame.Main
+
+-- GUI Stuff
+local play = player.PlayerGui.Game.PlayFrame
+local main = play.Main
+local data = player.DataFolder.Value
 local stuff = main.Field.Objects
+
+-- Prestige
+local prestigeGui = play.GoldenCircles
+local mayo = prestigeGui.Confirm.Prestige
+local cap = prestigeGui.Confirm.Captcha.Main.Captcha
+local capRemote = game.ReplicatedStorage.Events.Captcha
 
 -- Get Match
 function match(img)
@@ -21,17 +34,58 @@ end
 -- UI Library
 local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
 local window = library:CreateWindow("salad bowl")
-window:AddLabel({text = "discord.gg/uWAMYAgSTT"})
-window:AddBind({text='Toggle',callback=function()
+window:AddLabel({text="discord.gg/uWAMYAgSTT"})
+window:AddBind({text='Auto-Merge Toggle',callback=function()
     Enabled = not Enabled
+    LastReset = tick()
 end})
+local presFolder = window:AddFolder("Auto Prestige")
+presFolder:AddToggle({text='Enabled',callback=function(a)Reset=a;end})
+presFolder:AddLabel({text="Timer to prestige"})
+presFolder:AddSlider({text='Seconds',min=5,max=300,float=5,callback=function(a)ResetTimer=a;end})
 library:Init()
+
+-- Prestige Check
+function prestigeCheck()
+    if Enabled and Reset and tick()-LastReset >= ResetTimer then
+        if data.NumberValues.ResetsUntilCaptcha.Value == 0 then
+            local captcha = cap.PlaceholderText:split('"')[2]
+            for i = 1, #captcha do local v = captcha:sub(1,i)
+                capRemote:FireServer(v)
+                wait(.1)
+            end
+            wait(1)
+        end
+        prestigeGui.Visible = true
+        prestigeGui.Confirm.Visible = true
+        mayo.Visible = true
+        wait(.1)
+        vim:SendMouseButtonEvent(mayo.AbsolutePosition.X+mayo.AbsoluteSize.X/2,mayo.AbsolutePosition.Y+50,0,true,game,1)
+        vim:SendMouseButtonEvent(mayo.AbsolutePosition.X+mayo.AbsoluteSize.X/2,mayo.AbsolutePosition.Y+50,0,false,game,1)
+        LastReset = tick()
+    end
+end
 
 -- Skeet
 while true do
     if Enabled then
+        -- Auto Upgrade
+        for i = 1, 2 do local mayo = main.CU[i].Buy
+            if Enabled and mayo.Price.TextColor3 ~= Color3.new(1,0,0) then
+                repeat
+                    vim:SendMouseButtonEvent(mayo.Buy.AbsolutePosition.X+mayo.Buy.AbsoluteSize.X/2,mayo.Buy.AbsolutePosition.Y+50,0,true,game,1)
+                    vim:SendMouseButtonEvent(mayo.Buy.AbsolutePosition.X+mayo.Buy.AbsoluteSize.X/2,mayo.Buy.AbsolutePosition.Y+50,0,false,game,1)
+                    wait()
+                until not Enabled or mayo.Price.TextColor3 == Color3.new(1,0,0)
+                break
+            end
+        end
         -- Auto Merge
-        for i,v in pairs(stuff:GetChildren()) do
+        local femboy = stuff:GetChildren()
+        table.sort(femboy, function(a,b)
+            return data.Tiers[a.Name].Value > data.Tiers[b.Name].Value 
+        end)
+        for i = 1, #femboy do local v = femboy[i]
             if Enabled and v.Visible and v:FindFirstChild("Image") and v.Image.Image ~= "rbxassetid://5134453133" then
                 local sex = match(v)
                 if sex then
@@ -43,17 +97,12 @@ while true do
                     wait()
                     vim:SendMouseButtonEvent(sex.AbsolutePosition.X+sex.AbsoluteSize.X/2,sex.AbsolutePosition.Y+sex.AbsoluteSize.Y/2,0,false,game,1)
                     wait(.1)
+                    break
                 end
             end
         end
-        -- Auto Upgrade
-        for i = 1, 2 do local mayo = main.CU[i].Buy
-            if mayo.Price.TextColor3 ~= Color3.new(1,0,0) then
-                vim:SendMouseButtonEvent(mayo.Buy.AbsolutePosition.X+mayo.Buy.AbsoluteSize.X/2,mayo.Buy.AbsolutePosition.Y+50,0,true,game,1)
-                vim:SendMouseButtonEvent(mayo.Buy.AbsolutePosition.X+mayo.Buy.AbsoluteSize.X/2,mayo.Buy.AbsolutePosition.Y+50,0,false,game,1)
-                wait(.1)
-            end
-        end
+        -- Auto Prestige
+        prestigeCheck()
     end
-    wait(.1)
+    wait()
 end
