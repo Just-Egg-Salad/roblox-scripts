@@ -2,6 +2,7 @@
 Enabled = false
 Reset = false
 AutoUpgrade = {false,false}
+FarmMode = "Normal"
 ResetTimer = 5
 LastReset = tick()
 
@@ -29,6 +30,10 @@ local mayo = prestigeGui.Confirm.Prestige
 local cap = prestigeGui.Confirm.Captcha.Main.Captcha
 local capRemote = game.ReplicatedStorage.Events.Captcha
 
+-- Merge Quest
+local tier = data.Upgrades1["1"]
+local questTier = data.MergeQuest.Tier
+
 -- Get Match
 function match(img)
     local shit = stuff:GetChildren()
@@ -40,6 +45,11 @@ function match(img)
     return false
 end
 
+-- Click Function
+function click(a,b)
+    vim:SendMouseButtonEvent(a.AbsolutePosition.X+a.AbsoluteSize.X/2,a.AbsolutePosition.Y+50,0,b,game,1)
+end
+
 -- Click Falling Objects
 local falling = player.PlayerGui.Game.FallingObjects
 falling.ChildAdded:Connect(function(v)
@@ -47,8 +57,8 @@ falling.ChildAdded:Connect(function(v)
     if Enabled then
         Enabled = false
         wait(.1)
-        vim:SendMouseButtonEvent(v.AbsolutePosition.X+v.AbsoluteSize.X/2,v.AbsolutePosition.Y+50,0,true,game,1)
-        vim:SendMouseButtonEvent(v.AbsolutePosition.X+v.AbsoluteSize.X/2,v.AbsolutePosition.Y+50,0,false,game,1)
+        click(v,true)
+        click(v,false)
         wait()
         Enabled = true
     end
@@ -58,6 +68,7 @@ end)
 local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
 local window = library:CreateWindow("salad bowl")
 window:AddLabel({text="discord.gg/uWAMYAgSTT"})
+window:AddList({text='Mode',values={"Normal","Merge-Quest"},callback=function(a)FarmMode=a;end})
 window:AddBind({text='Auto-Merge Toggle',callback=function()
     Enabled = not Enabled
     LastReset = tick()
@@ -72,8 +83,8 @@ presFolder:AddSlider({text='Seconds',min=5,max=300,float=5,callback=function(a)R
 library:Init()
 
 -- Prestige Check
-function prestigeCheck()
-    if Enabled and Reset and tick()-LastReset >= ResetTimer then
+function prestigeCheck(FORCED)
+    if FORCED or Enabled and Reset and tick()-LastReset >= ResetTimer then
         if data.NumberValues.ResetsUntilCaptcha.Value == 0 then
             local captcha = cap.PlaceholderText:split('"')[2]
             for i = 1, #captcha do local v = captcha:sub(1,i)
@@ -86,24 +97,56 @@ function prestigeCheck()
         prestigeGui.Confirm.Visible = true
         mayo.Visible = true
         wait(.1)
-        vim:SendMouseButtonEvent(mayo.AbsolutePosition.X+mayo.AbsoluteSize.X/2,mayo.AbsolutePosition.Y+50,0,true,game,1)
-        vim:SendMouseButtonEvent(mayo.AbsolutePosition.X+mayo.AbsoluteSize.X/2,mayo.AbsolutePosition.Y+50,0,false,game,1)
+        click(mayo,true)
+        click(mayo,false)
         LastReset = tick()
     end
 end
 
 -- Skeet
 while true do
+    -- Check if Enabled
     if Enabled then
         -- Auto Upgrade
         for i = 1, 2 do local mayo = main.CU[i].Buy
             if Enabled and AutoUpgrade[i] == true and mayo.Price.TextColor3 ~= Color3.new(1,0,0) then
                 repeat
-                    vim:SendMouseButtonEvent(mayo.Buy.AbsolutePosition.X+mayo.Buy.AbsoluteSize.X/2,mayo.Buy.AbsolutePosition.Y+50,0,true,game,1)
-                    vim:SendMouseButtonEvent(mayo.Buy.AbsolutePosition.X+mayo.Buy.AbsoluteSize.X/2,mayo.Buy.AbsolutePosition.Y+50,0,false,game,1)
+                    click(mayo.Buy,true)
+                    click(mayo.Buy,false)
                     wait()
                 until not AutoUpgrade[i] or not Enabled or mayo.Price.TextColor3 == Color3.new(1,0,0)
                 break
+            end
+        end
+        -- Normal Farm
+        if FarmMode == "Normal" then
+            -- Auto Prestige
+            prestigeCheck()
+        else -- Merge-Quest
+            -- Check Tier
+            if tier.Value > questTier.Value then
+                prestigeCheck(true)
+            elseif tier.Value < questTier.Value then
+                -- Get To Correct Tier
+                local mayo = main.CU["1"].Buy
+                repeat
+                    -- Set Buy Amount
+                    local amount = questTier.Value-tier.Value > 200 and 100 or questTier.Value-tier.Value > 20 and 10 or 1
+                    if amount ~= player.BuyAmount.Value then
+                        play.BuyAmount.Visible = true
+                        play.Main.Visible = false
+                        wait(.2)
+                        click(play.BuyAmount.Set[amount],true)
+                        click(play.BuyAmount.Set[amount],false)
+                        wait(.2)
+                        play.BuyAmount.Visible = false
+                        play.Main.Visible = true
+                    end
+                    -- Click
+                    click(mayo.Buy,true)
+                    click(mayo.Buy,false)
+                    wait(questTier.Value-tier.Value <= 10 and 0.35 or 0.1)
+                until not Enabled or mayo.Price.TextColor3 == Color3.new(1,0,0) or questTier.Value == tier.Value
             end
         end
         -- Auto Merge
@@ -117,18 +160,16 @@ while true do
                 if sex then
                     vim:SendMouseMoveEvent(v.AbsolutePosition.X+v.AbsoluteSize.X/2,v.AbsolutePosition.Y+v.AbsoluteSize.Y/2,game)
                     wait()
-                    vim:SendMouseButtonEvent(v.AbsolutePosition.X+v.AbsoluteSize.X/2,v.AbsolutePosition.Y+v.AbsoluteSize.Y/2,0,true,game,1)
+                    click(v,true)
                     wait()
                     vim:SendMouseMoveEvent(sex.AbsolutePosition.X+sex.AbsoluteSize.X/2,sex.AbsolutePosition.Y+sex.AbsoluteSize.Y/2,game)
                     wait()
-                    vim:SendMouseButtonEvent(sex.AbsolutePosition.X+sex.AbsoluteSize.X/2,sex.AbsolutePosition.Y+sex.AbsoluteSize.Y/2,0,false,game,1)
+                    click(sex,false)
                     wait(.1)
                     break
                 end
             end
         end
-        -- Auto Prestige
-        prestigeCheck()
     end
     wait()
 end
