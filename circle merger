@@ -1,7 +1,6 @@
 -- Enabled
 Enabled = false
 Reset = false
-AutoUpgrade = {false,false}
 FarmMode = "Normal"
 ResetTimer = 5
 LastReset = tick()
@@ -34,6 +33,10 @@ local capRemote = game.ReplicatedStorage.Events.Captcha
 local tier = data.Upgrades1["1"]
 local questTier = data.MergeQuest.Tier
 
+-- Upgrades
+local better = main.CU["1"].Buy
+local faster = main.CU["2"].Buy
+
 -- Get Match
 function match(img)
     local shit = stuff:GetChildren()
@@ -47,7 +50,7 @@ end
 
 -- Click Function
 function click(a,b)
-    vim:SendMouseButtonEvent(a.AbsolutePosition.X+a.AbsoluteSize.X/2,a.AbsolutePosition.Y+50,0,b,game,1)
+    vim:SendMouseButtonEvent(a.AbsolutePosition.X+a.AbsoluteSize.X/2,a.AbsolutePosition.Y+50,0,b,a,1)
 end
 
 -- Click Falling Objects
@@ -73,9 +76,6 @@ window:AddBind({text='Auto-Merge Toggle',callback=function()
     Enabled = not Enabled
     LastReset = tick()
 end})
-local autoUp = window:AddFolder("Auto Upgrade")
-autoUp:AddToggle({text='Better Circles',callback=function(a)AutoUpgrade[1]=a;end})
-autoUp:AddToggle({text='Faster Circles',callback=function(a)AutoUpgrade[2]=a;end})
 local presFolder = window:AddFolder("Auto Prestige")
 presFolder:AddToggle({text='Enabled',callback=function(a)Reset=a;end})
 presFolder:AddLabel({text="Timer to prestige"})
@@ -107,19 +107,24 @@ end
 while true do
     -- Check if Enabled
     if Enabled then
-        -- Auto Upgrade
-        for i = 1, 2 do local mayo = main.CU[i].Buy
-            if Enabled and AutoUpgrade[i] == true and mayo.Price.TextColor3 ~= Color3.new(1,0,0) then
-                repeat
-                    click(mayo.Buy,true)
-                    click(mayo.Buy,false)
-                    wait()
-                until not AutoUpgrade[i] or not Enabled or mayo.Price.TextColor3 == Color3.new(1,0,0)
-                break
-            end
+        -- Faster Circles Upgrade
+        if Enabled and faster.Price.TextColor3 ~= Color3.new(1,0,0) then
+            repeat
+                click(faster,true)
+                click(faster,false)
+                wait()
+            until not Enabled or faster.Price.TextColor3 == Color3.new(1,0,0)
         end
         -- Normal Farm
         if FarmMode == "Normal" then
+            -- Better Circles Upgrade
+            if Enabled and better.Price.TextColor3 ~= Color3.new(1,0,0) then
+                repeat
+                    click(better,true)
+                    click(better,false)
+                    wait()
+                until not Enabled or better.Price.TextColor3 == Color3.new(1,0,0)
+            end
             -- Auto Prestige
             prestigeCheck()
         else -- Merge-Quest
