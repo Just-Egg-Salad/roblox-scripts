@@ -1,3 +1,10 @@
+-- Enabled
+Enabled = false
+Reset = false
+AutoUpgrade = {false,false}
+ResetTimer = 5
+LastReset = tick()
+
 -- Non-Synapse Users
 if not pcall(function() return syn.protect_gui end) then
     syn = {}
@@ -5,12 +12,6 @@ if not pcall(function() return syn.protect_gui end) then
         egg.Parent = game.CoreGui
     end
 end
-
--- Enabled
-Enabled = false
-Reset = false
-ResetTimer = 5
-LastReset = tick()
 
 -- Variables
 local vim = game:GetService("VirtualInputManager")
@@ -39,6 +40,20 @@ function match(img)
     return false
 end
 
+-- Click Falling Objects
+local falling = player.PlayerGui.Game.FallingObjects
+falling.ChildAdded:Connect(function(v)
+    wait(3)
+    if Enabled then
+        Enabled = false
+        wait(.1)
+        vim:SendMouseButtonEvent(v.AbsolutePosition.X+v.AbsoluteSize.X/2,v.AbsolutePosition.Y+50,0,true,game,1)
+        vim:SendMouseButtonEvent(v.AbsolutePosition.X+v.AbsoluteSize.X/2,v.AbsolutePosition.Y+50,0,false,game,1)
+        wait()
+        Enabled = true
+    end
+end)
+
 -- UI Library
 local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
 local window = library:CreateWindow("salad bowl")
@@ -47,6 +62,9 @@ window:AddBind({text='Auto-Merge Toggle',callback=function()
     Enabled = not Enabled
     LastReset = tick()
 end})
+local autoUp = window:AddFolder("Auto Upgrade")
+autoUp:AddToggle({text='Better Circles',callback=function(a)AutoUpgrade[1]=a;end})
+autoUp:AddToggle({text='Faster Circles',callback=function(a)AutoUpgrade[2]=a;end})
 local presFolder = window:AddFolder("Auto Prestige")
 presFolder:AddToggle({text='Enabled',callback=function(a)Reset=a;end})
 presFolder:AddLabel({text="Timer to prestige"})
@@ -79,12 +97,12 @@ while true do
     if Enabled then
         -- Auto Upgrade
         for i = 1, 2 do local mayo = main.CU[i].Buy
-            if Enabled and mayo.Price.TextColor3 ~= Color3.new(1,0,0) then
+            if Enabled and AutoUpgrade[i] == true and mayo.Price.TextColor3 ~= Color3.new(1,0,0) then
                 repeat
                     vim:SendMouseButtonEvent(mayo.Buy.AbsolutePosition.X+mayo.Buy.AbsoluteSize.X/2,mayo.Buy.AbsolutePosition.Y+50,0,true,game,1)
                     vim:SendMouseButtonEvent(mayo.Buy.AbsolutePosition.X+mayo.Buy.AbsoluteSize.X/2,mayo.Buy.AbsolutePosition.Y+50,0,false,game,1)
                     wait()
-                until not Enabled or mayo.Price.TextColor3 == Color3.new(1,0,0)
+                until not AutoUpgrade[i] or not Enabled or mayo.Price.TextColor3 == Color3.new(1,0,0)
                 break
             end
         end
