@@ -1,6 +1,8 @@
 -- Enabled
 Enabled = false
 Reset = false
+Click = false
+Upgrading = false
 FarmMode = "Normal"
 ResetTimer = 5
 LastReset = tick()
@@ -37,12 +39,37 @@ local questTier = data.MergeQuest.Tier
 local better = main.CU["1"].Buy
 local faster = main.CU["2"].Buy
 
+-- Signal Waiter
+function timeout(event, timeout)
+	local signal = Instance.new("BindableEvent")
+	local conn = nil
+	conn = event:Connect(function(...)
+		if (conn ~= nil) then
+			conn:Disconnect()
+			signal:Fire(...)
+		end
+	end)
+	delay(timeout, function()
+		if (conn ~= nil) then
+			conn:Disconnect()
+			conn = nil
+			signal:Fire(nil)
+		end
+	end)
+	return signal.Event:wait()
+end
+
 -- Get Match
-function match(img)
-    local shit = stuff:GetChildren()
+function match(oop)
+    local shit = data.Tiers:GetChildren()
     for i = 1, #shit do local v = shit[i]
-        if v.Visible and v:FindFirstChild("Image") and v.Image.Image == img.Image.Image and v ~= img then
-            return v
+        if not v:FindFirstChild("EGG") and v.Value == oop.Value and v ~= oop then
+            Instance.new("Part",v).Name = "EGG"
+            spawn(function()
+                timeout(v.Changed,0.2)
+                v:ClearAllChildren()
+            end)
+            return stuff[v.Name]
         end
     end
     return false
@@ -58,12 +85,8 @@ local falling = player.PlayerGui.Game.FallingObjects
 falling.ChildAdded:Connect(function(v)
     wait(3)
     if Enabled then
-        Enabled = false
-        wait(.1)
         click(v,true)
         click(v,false)
-        wait()
-        Enabled = true
     end
 end)
 
@@ -72,15 +95,33 @@ local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'
 local window = library:CreateWindow("salad bowl")
 window:AddLabel({text="discord.gg/uWAMYAgSTT"})
 window:AddList({text='Mode',values={"Normal","Merge-Quest"},callback=function(a)FarmMode=a;end})
+window:AddToggle({text="Click Mastery",callback=function(a)Click=a;end})
 window:AddBind({text='Auto-Merge Toggle',callback=function()
     Enabled = not Enabled
     LastReset = tick()
+    if Click then
+        play.ClickMastery.Visible = not play.Main.Visible
+    end
 end})
 local presFolder = window:AddFolder("Auto Prestige")
-presFolder:AddToggle({text='Enabled',callback=function(a)Reset=a;end})
+presFolder:AddToggle({text='Enabled',callback=function(a)
+    Reset=a;
+    if Click then
+        play.ClickMastery.Visible = Enabled
+    end
+end})
 presFolder:AddLabel({text="Timer to prestige"})
 presFolder:AddSlider({text='Seconds',min=5,max=300,float=5,callback=function(a)ResetTimer=a;end})
 library:Init()
+
+-- Click Mastery
+local e = play.ClickMastery.Click
+game:GetService("RunService").RenderStepped:Connect(function()
+    if Enabled and Click and not Upgrading then
+        click(e,true)
+        click(e,false)
+    end
+end)
 
 -- Prestige Check
 function prestigeCheck(FORCED)
@@ -109,21 +150,28 @@ while true do
     if Enabled then
         -- Faster Circles Upgrade
         if Enabled and faster.Price.TextColor3 ~= Color3.new(1,0,0) then
+            Upgrading = true
             repeat
                 click(faster,true)
                 click(faster,false)
                 wait()
             until not Enabled or faster.Price.TextColor3 == Color3.new(1,0,0)
+            Upgrading = false
+            play.ClickMastery.Visible = Click and Enabled
         end
         -- Normal Farm
         if FarmMode == "Normal" then
             -- Better Circles Upgrade
             if Enabled and better.Price.TextColor3 ~= Color3.new(1,0,0) then
+                Upgrading = true
+                play.ClickMastery.Visible = false
                 repeat
                     click(better,true)
                     click(better,false)
                     wait()
                 until not Enabled or better.Price.TextColor3 == Color3.new(1,0,0)
+                Upgrading = false
+                play.ClickMastery.Visible = Click and Enabled
             end
             -- Auto Prestige
             prestigeCheck()
@@ -134,43 +182,51 @@ while true do
             elseif tier.Value < questTier.Value then
                 -- Get To Correct Tier
                 local mayo = main.CU["1"].Buy
+                Upgrading = true
+                play.ClickMastery.Visible = false
                 repeat
                     -- Set Buy Amount
                     local amount = questTier.Value-tier.Value > 200 and 100 or questTier.Value-tier.Value > 20 and 10 or 1
                     if amount ~= player.BuyAmount.Value then
                         play.BuyAmount.Visible = true
                         play.Main.Visible = false
-                        wait(.2)
+                        wait(.1)
                         click(play.BuyAmount.Set[amount],true)
                         click(play.BuyAmount.Set[amount],false)
-                        wait(.2)
+                        timeout(player.BuyAmount.Changed,0.3)
                         play.BuyAmount.Visible = false
                         play.Main.Visible = true
                     end
                     -- Click
                     click(mayo.Buy,true)
                     click(mayo.Buy,false)
-                    wait(questTier.Value-tier.Value <= 10 and 0.35 or 0.1)
-                until not Enabled or mayo.Price.TextColor3 == Color3.new(1,0,0) or questTier.Value == tier.Value
+                    timeout(tier.Changed,0.2)
+                until not Enabled or mayo.Price.TextColor3 == Color3.new(1,0,0) or questTier.Value >= tier.Value
+                play.ClickMastery.Visible = Click and Enabled
+                Upgrading = false
             end
         end
         -- Auto Merge
-        local femboy = stuff:GetChildren()
+        local femboy = data.Tiers:GetChildren()
         table.sort(femboy, function(a,b)
-            return data.Tiers[a.Name].Value > data.Tiers[b.Name].Value 
+            return a.Value > b.Value 
         end)
         for i = 1, #femboy do local v = femboy[i]
-            if Enabled and v.Visible and v:FindFirstChild("Image") and v.Image.Image ~= "rbxassetid://5134453133" then
+            if Enabled and v.Value > 0 and not v:FindFirstChild("EGG") then
                 local sex = match(v)
-                if sex then
-                    vim:SendMouseMoveEvent(v.AbsolutePosition.X+v.AbsoluteSize.X/2,v.AbsolutePosition.Y+v.AbsoluteSize.Y/2,game)
-                    wait()
-                    click(v,true)
-                    wait()
+                local g = stuff[v.Name]
+                if sex and g:FindFirstChild("Merge") then
+                    -- Yes
+                    Instance.new("Part",v).Name = "EGG"
+                    spawn(function()
+                        timeout(v.Changed,0.2)
+                        v:ClearAllChildren()
+                    end)
+                    -- Merge
                     vim:SendMouseMoveEvent(sex.AbsolutePosition.X+sex.AbsoluteSize.X/2,sex.AbsolutePosition.Y+sex.AbsoluteSize.Y/2,game)
                     wait()
-                    click(sex,false)
-                    wait(.1)
+                    g.Merge:FireServer()
+                    wait()
                     break
                 end
             end
