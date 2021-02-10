@@ -88,12 +88,7 @@ end
 falling.ChildAdded:Connect(function(v)
     wait(3)
     if Enabled then
-        local old = Click
-        Click = false
-        wait(.1)
         click(v)
-        wait(.1)
-        Click = old
     end
 end)
 
