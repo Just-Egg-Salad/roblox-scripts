@@ -2,9 +2,10 @@
 Enabled = false
 Reset = false
 Click = false
+MergeMastery = false
 Upgrading = false
 FarmMode = "Normal"
-ResetTimer = 5
+ResetTimer = 30
 LastReset = tick()
 
 -- Non-Synapse Users
@@ -24,6 +25,8 @@ local play = player.PlayerGui.Game.PlayFrame
 local main = play.Main
 local data = player.DataFolder.Value
 local stuff = main.Field.Objects
+local clickMastery = play.ClickMastery.Click
+local falling = player.PlayerGui.Game.FallingObjects
 
 -- Prestige
 local prestigeGui = play.GoldenCircles
@@ -76,17 +79,21 @@ function match(oop)
 end
 
 -- Click Function
-function click(a,b)
-    vim:SendMouseButtonEvent(a.AbsolutePosition.X+a.AbsoluteSize.X/2,a.AbsolutePosition.Y+50,0,b,a,1)
+function click(a)
+    vim:SendMouseButtonEvent(a.AbsolutePosition.X+a.AbsoluteSize.X/2,a.AbsolutePosition.Y+50,0,true,a,1)
+    vim:SendMouseButtonEvent(a.AbsolutePosition.X+a.AbsoluteSize.X/2,a.AbsolutePosition.Y+50,0,false,a,1)
 end
 
 -- Click Falling Objects
-local falling = player.PlayerGui.Game.FallingObjects
 falling.ChildAdded:Connect(function(v)
     wait(3)
     if Enabled then
-        click(v,true)
-        click(v,false)
+        local old = Click
+        Click = false
+        wait(.1)
+        click(v)
+        wait(.1)
+        Click = old
     end
 end)
 
@@ -95,31 +102,25 @@ local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'
 local window = library:CreateWindow("salad bowl")
 window:AddLabel({text="discord.gg/uWAMYAgSTT"})
 window:AddList({text='Mode',values={"Normal","Merge-Quest"},callback=function(a)FarmMode=a;end})
-window:AddToggle({text="Click Mastery",callback=function(a)Click=a;end})
+window:AddToggle({text='Merge Mastery Prestige',callback=function(a)MergeMastery=a;end})
+window:AddToggle({text='Click Mastery',callback=function(a)Click=a;end})
 window:AddBind({text='Auto-Merge Toggle',callback=function()
     Enabled = not Enabled
     LastReset = tick()
-    if Click then
-        play.ClickMastery.Visible = not play.Main.Visible
-    end
+    clickMastery.Parent = Enabled and play or play.ClickMastery
 end})
 local presFolder = window:AddFolder("Auto Prestige")
-presFolder:AddToggle({text='Enabled',callback=function(a)
-    Reset=a;
-    if Click then
-        play.ClickMastery.Visible = Enabled
-    end
-end})
+presFolder:AddToggle({text='Enabled',callback=function(a)Reset=a;end})
 presFolder:AddLabel({text="Timer to prestige"})
-presFolder:AddSlider({text='Seconds',min=5,max=300,float=5,callback=function(a)ResetTimer=a;end})
+presFolder:AddSlider({text='Seconds',min=ResetTimer,max=ResetTimer*20,float=5,callback=function(a)ResetTimer=a;end})
 library:Init()
 
 -- Click Mastery
-local e = play.ClickMastery.Click
 game:GetService("RunService").RenderStepped:Connect(function()
-    if Enabled and Click and not Upgrading then
-        click(e,true)
-        click(e,false)
+    if Enabled and Click and not Upgrading and #falling:GetChildren() == 2 then
+        click(clickMastery)
+    else
+        warn(Enabled,Click,not Upgrading,#falling:GetChildren())
     end
 end)
 
@@ -138,8 +139,7 @@ function prestigeCheck(FORCED)
         prestigeGui.Confirm.Visible = true
         mayo.Visible = true
         wait(.1)
-        click(mayo,true)
-        click(mayo,false)
+        click(mayo)
         LastReset = tick()
     end
 end
@@ -152,26 +152,21 @@ while true do
         if Enabled and faster.Price.TextColor3 ~= Color3.new(1,0,0) then
             Upgrading = true
             repeat
-                click(faster,true)
-                click(faster,false)
+                click(faster)
                 wait()
             until not Enabled or faster.Price.TextColor3 == Color3.new(1,0,0)
             Upgrading = false
-            play.ClickMastery.Visible = Click and Enabled
         end
         -- Normal Farm
         if FarmMode == "Normal" then
             -- Better Circles Upgrade
             if Enabled and better.Price.TextColor3 ~= Color3.new(1,0,0) then
                 Upgrading = true
-                play.ClickMastery.Visible = false
                 repeat
-                    click(better,true)
-                    click(better,false)
+                    click(better)
                     wait()
                 until not Enabled or better.Price.TextColor3 == Color3.new(1,0,0)
                 Upgrading = false
-                play.ClickMastery.Visible = Click and Enabled
             end
             -- Auto Prestige
             prestigeCheck()
@@ -181,9 +176,8 @@ while true do
                 prestigeCheck(true)
             elseif tier.Value < questTier.Value then
                 -- Get To Correct Tier
-                local mayo = main.CU["1"].Buy
+                local mayo2 = main.CU["1"].Buy
                 Upgrading = true
-                play.ClickMastery.Visible = false
                 repeat
                     -- Set Buy Amount
                     local amount = questTier.Value-tier.Value > 200 and 100 or questTier.Value-tier.Value > 20 and 10 or 1
@@ -191,18 +185,15 @@ while true do
                         play.BuyAmount.Visible = true
                         play.Main.Visible = false
                         wait(.1)
-                        click(play.BuyAmount.Set[amount],true)
-                        click(play.BuyAmount.Set[amount],false)
+                        click(play.BuyAmount.Set[amount])
                         timeout(player.BuyAmount.Changed,0.3)
                         play.BuyAmount.Visible = false
                         play.Main.Visible = true
                     end
                     -- Click
-                    click(mayo.Buy,true)
-                    click(mayo.Buy,false)
+                    click(mayo2.Buy)
                     timeout(tier.Changed,0.2)
-                until not Enabled or mayo.Price.TextColor3 == Color3.new(1,0,0) or questTier.Value >= tier.Value
-                play.ClickMastery.Visible = Click and Enabled
+                until not Enabled or mayo2.Price.TextColor3 == Color3.new(1,0,0) or tier.Value >= questTier.Value
                 Upgrading = false
             end
         end
@@ -230,6 +221,18 @@ while true do
                     break
                 end
             end
+        end
+        -- Merge Mastery Prestige
+        if MergeMastery and data.MergeMastery.Level.Value >= 50 then
+            Upgrading = true
+            play.MergeMastery.Visible = true
+            play.MergeMastery.Prestige.Unlocked.Prestige.Visible = true
+            wait(.1)
+            click(play.MergeMastery.Prestige.Unlocked.Prestige)
+            wait(.1)
+            play.MergeMastery.Visible = false
+            play.MergeMastery.Prestige.Unlocked.Prestige.Visible = false
+            Upgrading = false
         end
     end
     wait()
