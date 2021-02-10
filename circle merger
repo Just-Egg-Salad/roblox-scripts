@@ -119,8 +119,6 @@ library:Init()
 game:GetService("RunService").RenderStepped:Connect(function()
     if Enabled and Click and not Upgrading and #falling:GetChildren() == 2 then
         click(clickMastery)
-    else
-        warn(Enabled,Click,not Upgrading,#falling:GetChildren())
     end
 end)
 
