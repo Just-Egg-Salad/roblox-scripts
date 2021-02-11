@@ -61,6 +61,7 @@ while true do
                     wait()
                     game.ReplicatedStorage.Remotes.Attack:FireServer()
                 until v.Parent ~= workspace.Chests or not v:FindFirstChild("Health") or v.Health.Value <= 0
+		break
             end
         end
     end
