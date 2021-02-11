@@ -1,0 +1,67 @@
+-- Signal Waiter
+function timeout(event, timeout)
+	local signal = Instance.new("BindableEvent")
+	local conn = nil
+	conn = event:Connect(function(...)
+		if (conn ~= nil) then
+			conn:Disconnect()
+			signal:Fire(...)
+		end
+	end)
+	delay(timeout, function()
+		if (conn ~= nil) then
+			conn:Disconnect()
+			conn = nil
+			signal:Fire(nil)
+		end
+	end)
+	return signal.Event:wait()
+end
+
+-- Variable
+local player = game.Players.LocalPlayer
+local folder = (function()
+    for i,v in pairs(workspace:GetChildren()) do
+        if timeout(v.Changed,0.1) then
+            return v
+        end
+    end
+end)()
+
+-- Grab XP
+spawn(function()
+    while true do
+        for i,v in pairs(folder:GetChildren()) do
+            repeat
+                pcall(function()
+                    v.CFrame = player.Character.BodyHitbox.CFrame
+                end)
+                wait()
+            until v.Parent ~= folder
+        end
+        wait()
+    end
+end)
+
+-- NoClip
+game:GetService("RunService").RenderStepped:Connect(function()
+    player.Character.Humanoid:ChangeState(11)
+end)
+
+-- Farm Chests
+while true do
+    for i,chest in pairs({"Legendary","Epic","Common"}) do
+        for i,v in pairs(workspace.Chests:GetChildren()) do
+            if v.Name == chest and v:FindFirstChild("Health") and v.Health.Value > 0 then
+                repeat
+                    pcall(function()
+                        player.Character.HumanoidRootPart.CFrame = v.PrimaryPart.CFrame
+                        player.Character.HumanoidRootPart.CustomName:Destroy()
+                    end)
+                    wait()
+                    game.ReplicatedStorage.Remotes.Attack:FireServer()
+                until v.Parent ~= workspace.Chests or not v:FindFirstChild("Health") or v.Health.Value <= 0
+            end
+        end
+    end
+end 
