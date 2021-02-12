@@ -19,6 +19,7 @@ function timeout(event, timeout)
 end
 
 -- Variable
+local lastChange = tick()
 local player = game.Players.LocalPlayer
 local folder = (function()
     for i,v in pairs(workspace:GetChildren()) do
@@ -38,6 +39,7 @@ spawn(function()
                 end)
                 wait()
             until v.Parent ~= folder
+            wait(.1)
         end
         wait()
     end
@@ -47,6 +49,15 @@ end)
 game:GetService("RunService").RenderStepped:Connect(function()
     player.Character.Humanoid:ChangeState(11)
 end)
+
+-- Go back I want to be MONKE
+function goback(char)
+    wait()
+    if tick()-lastChange > 3 then
+        game.ReplicatedStorage.Remotes.Equip:FireServer("Bug", "1")
+    end
+end
+player.CharacterAdded:Connect(goback)
 
 -- Farm Chests
 while true do
@@ -61,8 +72,9 @@ while true do
                     wait()
                     game.ReplicatedStorage.Remotes.Attack:FireServer()
                 until v.Parent ~= workspace.Chests or not v:FindFirstChild("Health") or v.Health.Value <= 0
-		break
+		        break
             end
         end
     end
+    wait()
 end 
