@@ -55,6 +55,7 @@ function goback(char)
     wait()
     if tick()-lastChange > 3 then
         game.ReplicatedStorage.Remotes.Equip:FireServer("Bug", "1")
+	lastChange = tick()
     end
 end
 player.CharacterAdded:Connect(goback)
