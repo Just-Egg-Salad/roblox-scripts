@@ -1,0 +1,127 @@
+-- Exploit Check
+if not checkcaller then
+    game:Shutdown()
+    return
+end
+
+-- Get Lowest Health Enemy
+function enemy()
+    local health = math.huge
+    local egg = false
+    local shit = workspace.Enemy:GetChildren()
+    for i = 1, #shit do local v = shit[i]
+        if v:FindFirstChild("Health") then
+            local nHealth = v.Health.Value
+            if nHealth < health then
+                health = nHealth
+                egg = v
+            end
+        end
+    end
+    return egg
+end
+
+-- Get Touch Item
+function touchy()
+    -- 'firetouchinterest' Check
+    if not firetouchinterest then return false end
+    -- Get Item
+    local shit = workspace.Touch:GetChildren()
+    for i = 1, #shit do local v = shit[i]
+        if v.Name:find("Coin") or v.Name:find("Key") or v.Name:find("SoulHeart") then
+            return v
+        end
+    end
+end
+
+-- Bypass
+local old;
+old = hookfunction(getrawmetatable(game).__index,function(femboy,cum)
+    if femboy == game and cum == "PlaceId" then
+        return 123
+    elseif tostring(femboy) == "Humanoid" and cum == "AutoRotate" then
+        return false
+    end
+    return old(femboy,cum)
+end)
+
+-- Variable
+local player = game.Players.LocalPlayer
+
+-- NoClip
+game:GetService("RunService").RenderStepped:Connect(function()
+    player.Character.Humanoid:ChangeState(11)
+end)
+
+-- Wow what a good hitbox
+game.ReplicatedStorage.Projectile2.OnClientInvoke = enemy
+
+-- Signal Waiter
+function timeout(event, timeout)
+	local signal = Instance.new("BindableEvent")
+	local conn = nil
+	conn = event:Connect(function(...)
+		if (conn ~= nil) then
+			conn:Disconnect()
+			signal:Fire(...)
+		end
+	end)
+	delay(timeout, function()
+		if (conn ~= nil) then
+			conn:Disconnect()
+			conn = nil
+			signal:Fire(nil)
+		end
+	end)
+	return signal.Event:wait()
+end
+
+-- :)
+while true do
+    -- Check for Enemies
+    if enemy() or timeout(workspace.Enemy.ChildAdded,5) then
+        -- Kill Enemies
+        repeat
+            pcall(function()
+                player.Character.HumanoidRootPart.CFrame = enemy().HumanoidRootPart.CFrame + Vector3.new(0,_G.Offset,0)
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position,enemy().HumanoidRootPart.Position)
+                player.Backpack.Input:FireServer("m1")
+            end)
+            wait()
+        until not enemy()
+    else
+        -- Collect Touch Items
+        repeat
+            -- Get
+            local femboy = touchy()
+            -- Collect
+            pcall(function()
+                player.Character.HumanoidRootPart.CFrame = femboy.CFrame + Vector3.new(0,_G.Offset,0)
+                wait()
+                firetouchinterest(player.Character.Toucher,femboy,0)
+                firetouchinterest(player.Character.Toucher,femboy,1)
+                -- Prevent Getting Stuck
+                if math.random(1,30) == 1 then
+                    femboy:Destroy()
+                end
+            end)
+            wait()
+        until not touchy()
+        -- Next Level
+        local new = false
+        spawn(function()
+            workspace.Dungeon.ChildAdded:wait()
+            new = true
+        end)
+        -- Stair TP
+        repeat
+            pcall(function()
+                player.Character.HumanoidRootPart.CFrame = workspace.Dungeon.Stairs.Touch.CFrame
+                firetouchinterest(player.Character.Toucher,workspace.Dungeon.Stairs.Touch,0)
+                firetouchinterest(player.Character.Toucher,workspace.Dungeon.Stairs.Touch,1)
+            end)
+            wait()
+        until new
+    end
+    wait()
+end
