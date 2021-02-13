@@ -37,9 +37,9 @@ end
 -- Bypass
 local old;
 old = hookfunction(getrawmetatable(game).__index,function(femboy,cum)
-    if femboy == game and cum == "PlaceId" then
+    if femboy == game and cum == "PlaceId" then -- TP Bypass
         return 123
-    elseif tostring(femboy) == "Humanoid" and cum == "AutoRotate" then
+    elseif tostring(femboy) == "Humanoid" and cum == "AutoRotate" then -- Stop AutoRotate
         return false
     end
     return old(femboy,cum)
