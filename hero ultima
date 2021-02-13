@@ -1,0 +1,28 @@
+-- Settings
+Stat = "PowerStat"
+Amount = 100
+Femboy = false
+
+-- Variable
+local player = game.Players.LocalPlayer
+
+-- UI Library
+local library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
+local window = library:CreateWindow("stat change")
+window:AddLabel({text = "Made by egg salad"})
+window:AddLabel({text = "You need 1 point"})
+window:AddList({text='Stat',values={"Power","Agility","Quirk","Defense","Stamina"},callback=function(a)Stat=a.."Stat"end})
+window:AddSlider({text='Amount',min=1,max=500,callback=function(a)Amount=a;end})
+window:AddButton({text='Add', callback = function()
+    if femboy or player.Data.AttributePoints.Value < 1 then return end
+    femboy = true
+    local old = player.Data.AttributePoints.Value
+    for i = 1, Amount do
+        spawn(function()
+            game.ReplicatedStorage.Requests.AddPoint:InvokeServer(Stat, 0.5)
+        end)
+    end
+    wait(2)
+    femboy = false
+end})
+library:Init()
