@@ -62,7 +62,7 @@ player.CharacterAdded:Connect(goback)
 
 -- Farm Chests
 while true do
-    for i,chest in pairs({"Legendary","Epic","Common"}) do
+    for i,chest in pairs({"Mythic","Legendary","Epic","Common"}) do
         for i,v in pairs(workspace.Chests:GetChildren()) do
             if v.Name == chest and v:FindFirstChild("Health") and v.Health.Value > 0 then
                 repeat
