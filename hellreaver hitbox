@@ -1,6 +1,6 @@
 -- Globals
 Size = {X=2,Y=2,Z=1}
-Trans = 50
+Trans = 0
 Color = Color3.new(1,0,0)
 
 -- Variable
