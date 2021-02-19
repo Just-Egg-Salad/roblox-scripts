@@ -23,4 +23,5 @@ while true do
             repeat wait() until char:FindFirstChild("headcrab_classic")
         end
     end
+    wait()
 end
