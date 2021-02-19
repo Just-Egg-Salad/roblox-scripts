@@ -1,0 +1,26 @@
+-- Exploit Check
+if not firetouchinterest then
+  game:Shutdown()
+end
+
+-- Variable
+local player = game.Players.LocalPlayer
+
+-- :)
+while true do
+    local femboy = game:GetService("Players"):GetPlayers()
+    for i = 2, #femboy do local v = femboy[i]
+        if v.Team ~= game.Teams.Xen and v.Character and v.Character:FindFirstChild("Head") then
+            -- Kill
+            pcall(function()
+                firetouchinterest(player.Character.headcrab_classic,v.Character.Head,0)
+                firetouchinterest(player.Character.headcrab_classic,v.Character.Head,1)
+                wait(.4)
+            end)
+            -- Respawn
+            game.ReplicatedStorage.Remotes.Died_Remote:FireServer()
+            local char = player.CharacterAdded:wait()
+            repeat wait() until char:FindFirstChild("headcrab_classic")
+        end
+    end
+end
