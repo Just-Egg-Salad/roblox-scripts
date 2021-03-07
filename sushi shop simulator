@@ -179,7 +179,7 @@ local functions = {
         -- Actual Cooking
         for i,v in pairs(sushi) do
             -- Check For Empty Base
-            if energy.Value >= 10 and making.Value == 0 and not using(v) and player.attributes.Lv.Value >= v.Level.Value and fire(v,true) then
+            if energy.Value >= 10 and and not using(v) and player.attributes.Lv.Value >= v.Level.Value and fire(v,true) then
                 -- TP & Cook
                 repeat
                     tp(v.StandHere)
@@ -196,7 +196,7 @@ local functions = {
     washing = function()
         for i,v in pairs(dish) do
             -- Check
-            if energy.Value >= 10 and washing.Value == 0 and stock.PlatesDirty.Value > 0 and not using(v) and fire(v,true) then
+            if energy.Value >= 10 and stock.PlatesDirty.Value > 0 and not using(v) and fire(v,true) then
                 -- TP & Dish
                 repeat
                     tp(v.StandHere)
