@@ -179,7 +179,7 @@ local functions = {
         -- Actual Cooking
         for i,v in pairs(sushi) do
             -- Check For Empty Base
-            if energy.Value >= 10 and and not using(v) and player.attributes.Lv.Value >= v.Level.Value and fire(v,true) then
+            if energy.Value >= 10 and not using(v) and player.attributes.Lv.Value >= v.Level.Value and fire(v,true) then
                 -- TP & Cook
                 repeat
                     tp(v.StandHere)
