@@ -1,0 +1,94 @@
+-- Globals
+Distance = 7.5
+Priority = "Health" -- "Distance" or "Health"
+Skills = {
+    [1] = {true},
+    [2] = {true},
+    [3] = {true},
+    [4] = {true},
+}
+
+-- Variable
+local players = game.Players
+local player = players.LocalPlayer
+
+-- Invisciam
+player.DevCameraOcclusionMode = "Invisicam"
+
+-- Bypass
+local old;
+old = hookfunction(getrawmetatable(game).__namecall,function(...)
+    local cum = getnamecallmethod()
+    if cum == "Kick" or cum == "FireServer" and not checkcaller() then
+        return
+    end
+    return old(...)
+end)
+
+-- Get Enemy
+function getEnemy()
+    -- Variables
+    local enemy = {}
+    local shit = workspace.Living:GetChildren()
+    -- Get Enemies
+    for i = 1, #shit do local v = shit[i]
+        if not players:GetPlayerFromCharacter(v) and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+            table.insert(enemy,v)
+        end
+    end
+    -- Sort
+    table.sort(enemy,function(egg,cum)
+        return Priority == "Distance" and egg.HumanoidRootPart.Position.y < cum.HumanoidRootPart.Position.y or egg.Humanoid.Health < cum.Humanoid.Health
+    end)
+    -- Return
+    return #enemy > 0 and enemy[1] or nil
+end
+
+-- NoClip
+game:GetService("RunService").RenderStepped:Connect(function()
+    player.Character.Humanoid:ChangeState(11)
+end)
+
+-- Attack
+function okimtiredofthis(a,b,c)
+    local e = getEnemy()
+    if b then
+        return e and e.HumanoidRootPart or player.Character.HumanoidRootPart
+    end
+    return e and e.HumanoidRootPart.Position or player.Character.HumanoidRootPart.Position
+end
+local old;
+old = hookfunction(getrawmetatable(game).__newindex,function(egg,salad,femboy)
+    if not checkcaller() and salad == "OnClientInvoke" and egg.Name == "Mouse" then
+        egg.OnClientInvoke = okimtiredofthis
+    end
+    return old(egg,salad,femboy)
+end)
+game.ReplicatedStorage.Remotes.Mouse.OnClientInvoke = okimtiredofthis
+
+-- Yes
+for i = 1, 4 do
+    if Skills[i][1] == true then
+        Skills[i][2] = tick()
+    end
+end
+
+-- Skeet
+while true do
+    pcall(function()
+        -- Teleport
+        local enemy = getEnemy()
+        player.Character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame - Vector3.new(0,Distance,0)
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position,enemy.HumanoidRootPart.Position)
+        -- Attack
+        player.Backpack.Input.Remote:FireServer({"Light"})
+        -- Skills
+        for i = 1, 4 do
+            if Skills[i][1] == true and tick()-Skills[i][2] >= 1 and enemy.Humanoid.Health > 0 then
+                Skills[i][2] = tick()
+                player.Backpack.Input.Remote:FireServer({"Skill",tostring(i)})
+            end
+        end
+    end)
+    wait()
+end
