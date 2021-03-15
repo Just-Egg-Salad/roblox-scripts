@@ -1,13 +1,3 @@
--- Globals
-Distance = 7.5
-Priority = "Health" -- "Distance" or "Health"
-Skills = {
-    [1] = {true},
-    [2] = {true},
-    [3] = {true},
-    [4] = {true},
-}
-
 -- Variable
 local players = game.Players
 local player = players.LocalPlayer
