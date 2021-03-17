@@ -1,7 +1,6 @@
 -- Globals
 Distance = -7 -- TP Distance from enemy
-Delay = 0.2 -- Increase if you're being kicked
-BrokenServerTimer = 30 -- Seconds. Will leave the level if a new enemy doesn't spawn within this timeframe
+BrokenServerTimer = 300 -- Seconds. Will leave the level if a new enemy doesn't spawn within this timeframe
 ForceExpert = true -- Force the difficulty to be 'Expert'
 AutoSell = { -- Will not sell your equipped gear
     Swords = {
@@ -117,16 +116,16 @@ function getEnemies()
     local shit = workspace.Enemies:GetChildren()
     for i = 1, #shit do local v = shit[i]
         local hum = v:FindFirstChildOfClass("Humanoid")
-        if hum and v:FindFirstChild("HumanoidRootPart") then
+        if hum and hum.Health > 0 and v:FindFirstChild("HumanoidRootPart") then
             table.insert(femboys,v)
         end
     end
     -- Sort
     table.sort(femboys,function(current,mado)
-        return current:FindFirstChildOfClass("Humanoid").Health > mado:FindFirstChildOfClass("Humanoid").Health
+        return current:FindFirstChildOfClass("Humanoid").Health < mado:FindFirstChildOfClass("Humanoid").Health
     end)
     -- Return
-    return #femboys > 0 and femboys[1] or false
+    return #femboys > 0 and femboys or false
 end
 
 -- Broken Server Check
@@ -139,20 +138,30 @@ end)
 while true do
     -- Get Enemies
     local cum = getEnemies()
-    if typeof(cum) == "Instance" then
-        -- Yes
-        pcall(function()
-            -- Teleprt
-            player.Character.HumanoidRootPart.CFrame = cum.HumanoidRootPart.CFrame + Vector3.new(0,Distance,0)
-            player.Character.HumanoidRootPart.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position,cum.HumanoidRootPart.Position)
-            wait(Delay)
-            -- Insta-kill
-            for i = 1, 2 do
-                game.ReplicatedStorage.RE:FireServer("Hit",cum)
-                wait(Delay/8)
+    if type(cum) == "table" then
+        local cum1 = cum[1]
+        repeat
+            -- Teleport
+            pcall(function()
+                player.Character.HumanoidRootPart.CFrame = cum1.HumanoidRootPart.CFrame + Vector3.new(0,Distance,0)
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position,cum1.HumanoidRootPart.Position)
+            end)
+            wait()
+            -- Attack
+            pcall(function()
+                for i,v in pairs(getEnemies()) do
+                    if player:DistanceFromCharacter(v.HumanoidRootPart.Position) <= 15 then
+                        game.ReplicatedStorage.RE:FireServer("Hit",v)
+                    end
+                end
+            end)
+            -- Use Damage Spell
+            game.ReplicatedStorage.Magic:FireServer("Damage")
+            -- Use Support Spell
+            if player.Character.Humanoid.Health < player.Character.Humanoid.MaxHealth then
+                game.ReplicatedStorage.Magic:FireServer("Support")
             end
-            cum:FindFirstChildOfClass("Humanoid").Health = 0
-        end)
+        until not cum1.Parent or not cum1:FindFirstChildOfClass("Humanoid") or cum1:FindFirstChildOfClass("Humanoid").Health <= 0 or not cum1:FindFirstChild("HumanoidRootPart")
     end
     wait()
     -- Broken Server Check
