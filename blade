@@ -1,0 +1,102 @@
+-- Globals
+Distance = -7 -- TP Distance from enemy
+Delay = 0.2 -- Increase if you're being kicked
+AutoSell = { -- Will not sell your equipped sword
+    Common = true,
+    Uncommon = true,
+    Rare = true,
+    Epic = true,
+    Legendary = false
+}
+
+-- Auto-Start
+if game.PlaceId == 6494523288 then
+    -- Load
+    repeat
+        yes,lvl,swords,swordFolder,rf,info = pcall(function() return game.Players.LocalPlayer.Data.Stats.Level,game.Players.LocalPlayer.Data.Swords:FindFirstChildOfClass("Folder"),game.ReplicatedStorage.Sword,game.ReplicatedStorage.RF,require(game.ReplicatedStorage.Info) end)
+        wait(1)
+    until rf
+    -- Variables
+    local player = game.Players.LocalPlayer
+    local cum = {}
+    -- Get Maps
+    for map,v in pairs(info.Maps) do
+        for i,v in pairs(v) do
+            if type(v) == "number" and i ~= "ID" and i ~= "Badge" then
+                table.insert(cum,{map,i,v})
+            end
+        end
+    end
+    -- Sort Maps
+    table.sort(cum,function(sowd,invell)
+        return invell[3] < sowd[3]
+    end)   
+    -- Auto-Sell Before Leaving
+    for i,v in pairs(swords.Parent:GetChildren()) do
+        if v:FindFirstChild("Tag") and swordFolder:FindFirstChild(v.Tag.Value) and swordFolder[v.Tag.Value]:FindFirstChild("Rarity") and AutoSell[swordFolder[v.Tag.Value].Rarity.Value] and tonumber(v.Name) ~= player.Data.Stats.Sword.Value then
+            rf:InvokeServer("Sell",v)
+        end
+    end
+    -- Select Best
+    for i,v in pairs(cum) do
+        if lvl.Value >= v[3] then
+            rf:InvokeServer("Create",v[1],v[2],true,true)
+            rf:InvokeServer("Start")
+            return
+        end
+    end
+end
+
+-- Load
+repeat wait(1) until pcall(function() return game.Players.LocalPlayer.Character.HumanoidRootPart,workspace.Enemies:FindFirstChildOfClass("Model"),game.ReplicatedStorage.RE end)
+
+-- Variable
+local player = game.Players.LocalPlayer
+
+-- Invisciam
+player.DevCameraOcclusionMode = "Invisicam"
+
+-- NoClip
+game:GetService("RunService").RenderStepped:Connect(function()
+    player.Character.Humanoid:ChangeState(11)
+end)
+
+-- Get Enemies
+function getEnemies()
+    -- Variable
+    local femboys = {}
+    -- Get Nearby Enemies
+    local shit = workspace.Enemies:GetChildren()
+    for i = 1, #shit do local v = shit[i]
+        local hum = v:FindFirstChildOfClass("Humanoid")
+        if hum and hum.Health > 0 and v:FindFirstChild("HumanoidRootPart") then
+            table.insert(femboys,v)
+        end
+    end
+    -- Sort
+    table.sort(femboys,function(current,mado)
+        return current:FindFirstChildOfClass("Humanoid").Health < mado:FindFirstChildOfClass("Humanoid").Health
+    end)
+    -- Return
+    return #femboys > 0 and femboys[1] or false
+end
+
+-- Keel
+while true do
+    -- Get Enemies
+    local cum = getEnemies()
+    if typeof(cum) == "Instance" then
+        -- Yes
+        pcall(function()
+            -- Teleprt
+            player.Character.HumanoidRootPart.CFrame = cum.HumanoidRootPart.CFrame + Vector3.new(0,Distance,0)
+            player.Character.HumanoidRootPart.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position,cum.HumanoidRootPart.Position)
+            wait(Delay)
+            -- Insta-kill
+            game.ReplicatedStorage.RE:FireServer("Hit",cum)
+            wait()
+            cum:FindFirstChildOfClass("Humanoid").Health = 0
+        end)
+    end
+    wait()
+end
