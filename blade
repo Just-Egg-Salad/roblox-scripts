@@ -123,7 +123,7 @@ function getEnemies()
     end
     -- Sort
     table.sort(femboys,function(current,mado)
-        return current:FindFirstChildOfClass("Humanoid").Health < mado:FindFirstChildOfClass("Humanoid").Health
+        return current:FindFirstChildOfClass("Humanoid").Health > mado:FindFirstChildOfClass("Humanoid").Health
     end)
     -- Return
     return #femboys > 0 and femboys[1] or false
@@ -149,7 +149,7 @@ while true do
             -- Insta-kill
             for i = 1, 2 do
                 game.ReplicatedStorage.RE:FireServer("Hit",cum)
-                wait(Delay/10)
+                wait(Delay/8)
             end
             cum:FindFirstChildOfClass("Humanoid").Health = 0
         end)
