@@ -1,6 +1,7 @@
 -- Globals
 Distance = -7 -- TP Distance from enemy
 Delay = 0.2 -- Increase if you're being kicked
+ForceExpert = true -- Force the difficulty to be 'Expert'
 AutoSell = { -- Will not sell your equipped sword
     Common = true,
     Uncommon = true,
@@ -47,6 +48,16 @@ if game.PlaceId == 6494523288 then
     end
 end
 
+-- Force Expert
+local old;
+old = hookfunction(getrawmetatable(game).__namecall,function(...)
+    local args = {...}
+    if getnamecallmethod() == "FireServer" and tostring(args[2]) == "MapData" and ForceExpert then
+        args[3].difficulty = "Expert"
+    end
+    return old(unpack(args))
+end)
+
 -- Load
 repeat wait(1) until pcall(function() return game.Players.LocalPlayer.Character.HumanoidRootPart,workspace.Enemies:FindFirstChildOfClass("Model"),game.ReplicatedStorage.RE end)
 
@@ -81,6 +92,12 @@ function getEnemies()
     return #femboys > 0 and femboys[1] or false
 end
 
+-- Broken Server Check
+local lastSpawn = tick()
+workspace.Enemies.ChildAdded:Connect(function()
+    lastSpawn = tick()
+end)
+
 -- Keel
 while true do
     -- Get Enemies
@@ -99,4 +116,8 @@ while true do
         end)
     end
     wait()
+    -- Broken Server Check
+    if tick()-lastSpawn >= 30 then
+        game:GetService("TeleportService"):Teleport(6494523288)
+    end
 end
