@@ -117,7 +117,7 @@ function getEnemies()
     local shit = workspace.Enemies:GetChildren()
     for i = 1, #shit do local v = shit[i]
         local hum = v:FindFirstChildOfClass("Humanoid")
-        if hum and hum.Health > 0 and v:FindFirstChild("HumanoidRootPart") then
+        if hum and v:FindFirstChild("HumanoidRootPart") then
             table.insert(femboys,v)
         end
     end
