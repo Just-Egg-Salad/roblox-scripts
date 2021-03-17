@@ -1,20 +1,45 @@
 -- Globals
 Distance = -7 -- TP Distance from enemy
 Delay = 0.2 -- Increase if you're being kicked
+BrokenServerTimer = 30 -- Seconds. Will leave the level if a new enemy doesn't spawn within this timeframe
 ForceExpert = true -- Force the difficulty to be 'Expert'
-AutoSell = { -- Will not sell your equipped sword
-    Common = true,
-    Uncommon = true,
-    Rare = true,
-    Epic = true,
-    Legendary = false
+AutoSell = { -- Will not sell your equipped gear
+    Swords = {
+        Common = true,
+        Uncommon = true,
+        Rare = true,
+        Epic = false,
+        Legendary = false
+    },
+    DamageMagic = {
+        Common = true,
+        Uncommon = true,
+        Rare = true,
+        Epic = true,
+        Legendary = false
+    },
+    SupportMagic = {
+        Common = true,
+        Uncommon = true,
+        Rare = true,
+        Epic = false,
+        Legendary = false
+    }
 }
 
 -- Auto-Start
 if game.PlaceId == 6494523288 then
     -- Load
     repeat
-        yes,lvl,swords,swordFolder,rf,info = pcall(function() return game.Players.LocalPlayer.Data.Stats.Level,game.Players.LocalPlayer.Data.Swords:FindFirstChildOfClass("Folder"),game.ReplicatedStorage.Sword,game.ReplicatedStorage.RF,require(game.ReplicatedStorage.Info) end)
+        yes,lvl,swords,damageFolder,supportFolder,swordFolder,rf,info = pcall(function()return
+            game.Players.LocalPlayer.Data.Stats.Level,
+            game.Players.LocalPlayer.Data.Swords:FindFirstChildOfClass("Folder"),
+            game.Players.LocalPlayer.Data.Damage:FindFirstChildOfClass("Folder"),
+            game.Players.LocalPlayer.Data.Support:FindFirstChildOfClass("Folder"),
+            game.ReplicatedStorage.Sword,
+            game.ReplicatedStorage.RF,
+            require(game.ReplicatedStorage.Info)
+        end)
         wait(1)
     until rf
     -- Variables
@@ -32,9 +57,21 @@ if game.PlaceId == 6494523288 then
     table.sort(cum,function(sowd,invell)
         return invell[3] < sowd[3]
     end)   
-    -- Auto-Sell Before Leaving
+    -- Auto-Sell Sword
     for i,v in pairs(swords.Parent:GetChildren()) do
-        if v:FindFirstChild("Tag") and swordFolder:FindFirstChild(v.Tag.Value) and swordFolder[v.Tag.Value]:FindFirstChild("Rarity") and AutoSell[swordFolder[v.Tag.Value].Rarity.Value] and tonumber(v.Name) ~= player.Data.Stats.Sword.Value then
+        if v:FindFirstChild("Tag") and swordFolder:FindFirstChild(v.Tag.Value) and swordFolder[v.Tag.Value]:FindFirstChild("Rarity") and AutoSell.Swords[swordFolder[v.Tag.Value].Rarity.Value] and tonumber(v.Name) ~= player.Data.Stats.Sword.Value then
+            rf:InvokeServer("Sell",v)
+        end
+    end
+    -- Auto-Sell Damage
+    for i,v in pairs(damageFolder.Parent:GetChildren()) do
+        if AutoSell.DamageMagic[info.Magic[v.Tag.Value].Rarity] and tonumber(v.Name) ~= player.Data.Stats.Damage.Value then
+            rf:InvokeServer("Sell",v)
+        end
+    end
+    -- Auto-Sell Support
+    for i,v in pairs(supportFolder.Parent:GetChildren()) do
+        if AutoSell.SupportMagic[info.Magic[v.Tag.Value].Rarity] and tonumber(v.Name) ~= player.Data.Stats.Support.Value then
             rf:InvokeServer("Sell",v)
         end
     end
@@ -110,14 +147,16 @@ while true do
             player.Character.HumanoidRootPart.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position,cum.HumanoidRootPart.Position)
             wait(Delay)
             -- Insta-kill
-            game.ReplicatedStorage.RE:FireServer("Hit",cum)
-            wait()
+            for i = 1, 2 do
+                game.ReplicatedStorage.RE:FireServer("Hit",cum)
+                wait(Delay/10)
+            end
             cum:FindFirstChildOfClass("Humanoid").Health = 0
         end)
     end
     wait()
     -- Broken Server Check
-    if tick()-lastSpawn >= 30 then
+    if tick()-lastSpawn >= BrokenServerTimer then
         game:GetService("TeleportService"):Teleport(6494523288)
     end
 end
