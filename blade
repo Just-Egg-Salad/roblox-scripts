@@ -1,12 +1,18 @@
--- Globals
+-- [[ SETTINGS ]]
 Distance = -7 -- TP Distance from enemy
 BrokenServerTimer = 300 -- Seconds. Will leave the level if a new enemy doesn't spawn within this timeframe
 ForceExpert = true -- Force the difficulty to be 'Expert'
+AutoMerge = { -- Automatically merge Swords; will not merge your equipped sword
+    Common = true,
+    Uncommon = true,
+    Rare = true,
+    Epic = true,
+}
 AutoSell = { -- Will not sell your equipped gear
     Swords = {
-        Common = true,
-        Uncommon = true,
-        Rare = true,
+        Common = false,
+        Uncommon = false,
+        Rare = false,
         Epic = false,
         Legendary = false
     },
@@ -25,18 +31,22 @@ AutoSell = { -- Will not sell your equipped gear
         Legendary = false
     }
 }
+-- [[ END OF SETTINGS ]]
+
+
 
 -- Auto-Start
 if game.PlaceId == 6494523288 then
     -- Load
     repeat
-        yes,lvl,swords,damageFolder,supportFolder,swordFolder,rf,info = pcall(function()return
+        yes,lvl,swords,damageFolder,supportFolder,swordFolder,rf,re,info = pcall(function()return
             game.Players.LocalPlayer.Data.Stats.Level,
             game.Players.LocalPlayer.Data.Swords:FindFirstChildOfClass("Folder"),
             game.Players.LocalPlayer.Data.Damage:FindFirstChildOfClass("Folder"),
             game.Players.LocalPlayer.Data.Support:FindFirstChildOfClass("Folder"),
             game.ReplicatedStorage.Sword,
             game.ReplicatedStorage.RF,
+            game.ReplicatedStorage.RE,
             require(game.ReplicatedStorage.Info)
         end)
         wait(1)
@@ -56,10 +66,58 @@ if game.PlaceId == 6494523288 then
     table.sort(cum,function(sowd,invell)
         return invell[3] < sowd[3]
     end)   
-    -- Auto-Sell Sword
+    -- Count Rarities
+    local currentRarities = {
+        Legendary = {},
+        Epic = {},
+        Rare = {},
+        Uncommon = {},
+        Common = {}
+    }
     for i,v in pairs(swords.Parent:GetChildren()) do
-        if v:FindFirstChild("Tag") and swordFolder:FindFirstChild(v.Tag.Value) and swordFolder[v.Tag.Value]:FindFirstChild("Rarity") and AutoSell.Swords[swordFolder[v.Tag.Value].Rarity.Value] and tonumber(v.Name) ~= player.Data.Stats.Sword.Value then
-            rf:InvokeServer("Sell",v)
+        if v:FindFirstChild("Tag") and swordFolder:FindFirstChild(v.Tag.Value) and swordFolder[v.Tag.Value]:FindFirstChild("Rarity") and tonumber(v.Name) ~= player.Data.Stats.Sword.Value then
+            table.insert(currentRarities[swordFolder[v.Tag.Value].Rarity.Value],v)
+        end
+    end
+    -- Auto-Merge Sword
+    for i,v in pairs(currentRarities) do
+        -- Check
+        if #v >= 5 and AutoMerge[i] == true then
+            -- Grab 5 swords
+            local merge = {}
+            for _ = 1, 5 do
+                table.insert(merge,currentRarities[i][_])
+            end
+            -- Lazy Merge
+            for i = 1, 4 do
+                spawn(function()
+                    rf:InvokeServer("Merge",merge,i)
+                end)
+            end
+        end
+    end
+    -- Get Best Sword
+    local currentBest = {player.Data.Stats.Sword.Value,swords.Parent[player.Data.Stats.Sword.Value].Amnt.Value}
+    for i,v in pairs(swords.Parent:GetChildren()) do
+        if v:FindFirstChild("Amnt") and v:FindFirstChild("Lvl") and v.Lvl.Value <= player.Data.Stats.Level.Value then
+            local newBest = v.Amnt.Value
+            if newBest > currentBest[2] then
+                currentBest[1] = v.Name
+                currentBest[2] = v.Amnt.Value
+            end
+        end
+    end
+    -- Equip Best Sword
+    if player.Data.Stats.Sword.Value ~= currentBest[1] then
+        re:FireServer("Equip",swords.Parent[currentBest[1]])
+        wait(0.5)
+    end
+    -- Auto-Sell Sword
+    for i,v in pairs(currentRarities) do
+        if AutoSell.Swords[i] == true then
+            for i,v in pairs(v) do
+                rf:InvokeServer("Sell",v)
+            end
         end
     end
     -- Auto-Sell Damage
