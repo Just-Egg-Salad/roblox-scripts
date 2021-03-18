@@ -1,12 +1,13 @@
 -- [[ START OF SETTINGS ]]
-Distance = -7 -- TP Distance from enemy
+Distance = 8 -- TP Distance from enemy
 BrokenServerTimer = 300 -- Seconds. Will leave the level if a new enemy doesn't spawn within this timeframe
+Speed = 100 -- TP Speed, lower if you get teleported back to the lobby before finishing the level
 ForceExpert = true -- Force the difficulty to be 'Expert'
 AutoMerge = { -- Automatically merge Swords; will not merge your equipped sword
     Common = true,
     Uncommon = true,
     Rare = true,
-    Epic = true,
+    Epic = true
 }
 AutoSell = { -- Will not sell your equipped gear
     Swords = {
@@ -197,7 +198,15 @@ while true do
     -- Get Enemies
     local cum = getEnemies()
     if type(cum) == "table" then
+        -- Set
         local cum1 = cum[1]
+        -- Tween
+        if player:DistanceFromCharacter(cum1.HumanoidRootPart.Position) > 15 then
+            local target = cum1.HumanoidRootPart.CFrame
+            game:GetService("TweenService"):Create(player.Character.HumanoidRootPart, TweenInfo.new(player:DistanceFromCharacter(target.Position)/Speed, Enum.EasingStyle.Linear), {CFrame = target*CFrame.Angles(math.rad(Distance > 0 and -90 or 90),0,0)+Vector3.new(0,Distance,0)}):Play()
+            wait(player:DistanceFromCharacter(target.Position)/Speed)
+        end
+        -- Kill
         repeat
             -- Teleport
             pcall(function()
