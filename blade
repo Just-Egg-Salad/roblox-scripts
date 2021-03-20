@@ -164,10 +164,11 @@ player.DevCameraOcclusionMode = "Invisicam"
 
 -- NoClip
 game:GetService("RunService").RenderStepped:Connect(function()
-    player.Character.Humanoid:ChangeState(11)
+    player.Character.HumanoidRootPart.Velocity = Vector3.new()
+    player.Character.Humanoid:ChangeState(10)
 end)
 
--- Get Enemies
+-- Get Closest Enemies
 function getEnemies()
     -- Variable
     local femboys = {}
@@ -181,7 +182,7 @@ function getEnemies()
     end
     -- Sort
     table.sort(femboys,function(current,mado)
-        return current:FindFirstChildOfClass("Humanoid").Health < mado:FindFirstChildOfClass("Humanoid").Health
+        return player:DistanceFromCharacter(current.HumanoidRootPart.Position) < player:DistanceFromCharacter(mado.HumanoidRootPart.Position)
     end)
     -- Return
     return #femboys > 0 and femboys or false
