@@ -22,7 +22,7 @@ window:AddLabel({text = "You need 1 point"})
 window:AddList({text='Stat',values={"Power","Agility","Quirk","Defense","Stamina"},callback=function(a)Stat=a.."Stat"end})
 window:AddSlider({text='Amount',min=1,max=500,callback=function(a)Amount=a;end})
 window:AddButton({text='Add', callback = function()
-    game.ReplicatedStorage.Requests.AEBan:FireServer("Weebs are cringe") -- :) kill yourself
+    game.Players.LocalPlayer.Character:FindFirstChildOfClass("Script"):Destroy()
     if femboy or player.Data.AttributePoints.Value < 1 then return end
     femboy = true
     local old = player.Data.AttributePoints.Value
