@@ -1614,10 +1614,7 @@ function library:Init()
 	elseif get_hidden_gui then
 		get_hidden_gui(self.base)
 	else
-        syn = {}
-        syn.protect_gui = function(egg)
-            egg.Parent = game.CoreGui
-        end
+        self.base.Parent = game.CoreGui
 	end
 	self.base.Parent = game:GetService"CoreGui"
 	
